@@ -1,40 +1,92 @@
-# Crona — Agendador e Assinatura Digital
+# 🕓 Crona — Agendador e Assinatura Digital
 
-Versão neutra e melhorada do antigo projeto **Kanarô**, voltada a **agendamentos genéricos** (consultas, reuniões, aulas, eventos) com **assinatura digital** do termo.
+**Crona** é uma aplicação web moderna para **agendamentos de eventos, reuniões ou atendimentos**, com fluxo completo de **cadastro**, **termo de consentimento** e **assinatura digital** via canvas.  
+Desenvolvida em **HTML, TailwindCSS e JavaScript puro**, integra facilmente com **Supabase**, **APIs REST** ou qualquer backend customizado.
 
-## ✨ O que mudou
-- Vocabulário 100% neutro (remove referências rituais/ayahuasca).
-- Campos e textos atualizados: **agendamento** (slot), **local**, **LGPD** genérico.
-- Arquitetura idêntica (HTML + Tailwind + JS + IMask + Canvas) para fácil migração.
-- URLs das Edge Functions ficam em **constantes configuráveis** (`CRONA_*`).
+---
 
-## 🧩 Estrutura
+## 🚀 Funcionalidades
+
+- ✅ Seleção de data e horário (slot)
+- 🧾 Formulário completo de dados do participante
+- ✍️ Assinatura digital (desenho ou nome digitado)
+- 🔐 Termo de consentimento + LGPD
+- 💾 Integração com Supabase Edge Functions
+- 🎨 Layout responsivo com TailwindCSS
+
+---
+
+## 🧩 Estrutura do Projeto
+
 ```
 crona/
-  ├─ index.html           # Busca por CPF + seleção de data
-  ├─ pages/
-  │   ├─ termo.html       # Formulário completo + assinatura digital
-  │   ├─ sucesso.html     # Confirmação
-  │   └─ ja-assinou.html  # Usuário já assinou
-  └─ assets/
-      └─ js/
-          └─ script.js    # Lógica de máscaras, assinatura e envio
+├─ index.html              # Tela inicial (CPF + data)
+├─ pages/
+│  ├─ termo.html           # Formulário + assinatura
+│  ├─ sucesso.html         # Confirmação de envio
+│  └─ ja-assinou.html      # Mensagem de já assinado
+└─ assets/
+   └─ js/
+      └─ script.js         # Lógica, máscaras e envio
 ```
 
-## ⚙️ Configuração (Supabase Edge Functions)
-Crie/aponte suas funções e ajuste as **constantes**:
+---
 
-- Em `index.html`:
-  - `CRONA_FN_LOOKUP` — busca participante por CPF para o slot escolhido
-  - `CRONA_LIST_URL` — lista de datas/slots disponíveis
+## ⚙️ Configuração
 
-- Em `assets/js/script.js`:
-  - `CRONA_FN_SUBMIT` — grava assinatura e dados
+No código, substitua as URLs das suas funções/API:
 
-> Dica: mantenha os payloads compatíveis com o que você já usa (basta adaptar os nomes de campos: `cerimonia_*` → `slot_*`).
+### Em `index.html`
+```js
+const CRONA_FN_LOOKUP = "https://YOUR_PROJECT.functions.supabase.co/lookup_cpf";
+const CRONA_LIST_URL  = "https://YOUR_PROJECT.functions.supabase.co/list_slots";
+```
 
-## ▶️ Rodando localmente
-Abra `index.html` no navegador (ou use o Live Server do VSCode).
+### Em `assets/js/script.js`
+```js
+const CRONA_FN_SUBMIT = "https://YOUR_PROJECT.functions.supabase.co/submit_consent";
+```
 
-## 📝 Licença
-MIT — use livremente.
+---
+
+## 💻 Executando Localmente
+
+1. Clone este repositório:
+   ```bash
+   git clone git@github.com:LuckyLee89/Crona-Agendador.git
+   ```
+2. Acesse a pasta:
+   ```bash
+   cd Crona-Agendador
+   ```
+3. Abra o arquivo `index.html` diretamente no navegador  
+   *(ou use a extensão **Live Server** do VSCode).*
+
+---
+
+## 🧠 Tecnologias Utilizadas
+
+- **HTML5**
+- **TailwindCSS**
+- **JavaScript Vanilla (ES6)**
+- **IMask.js**
+- **Canvas API**
+- **Supabase Edge Functions (opcional)**
+
+---
+
+## 📸 Demonstração Visual (Opcional)
+> Adicione aqui uma captura de tela da interface (ex: `assets/preview.png`)
+
+---
+
+## 🧾 Licença
+
+Este projeto está sob a licença **MIT** — uso livre para fins pessoais e profissionais.  
+Desenvolvido por [Lincon Antunes Pereira](https://github.com/LuckyLee89) 💡
+
+---
+
+### ⭐ Dica para Portfólio
+O **Crona** é um excelente exemplo de aplicação **frontend pura** integrável a qualquer API.  
+Você pode hospedá-lo gratuitamente no **GitHub Pages**, **Vercel** ou **Fly.io**.
