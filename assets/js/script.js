@@ -290,17 +290,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // --------- CONFIG: ajuste a URL da função de envio ---------
       const CRONA_FN_SUBMIT =
-        window.CRONA_FN_SUBMIT ||
-        'https://qrtjuypghjbyrbepwvbb.supabase.co/functions/v1/submit_consent';
-      const resp = await fetch(CRONA_FN_SUBMIT, {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({
-          participante,
-          termo,
-          assinatura_png_base64: pngDataUrl,
-        }),
-      });
+        (window.CronaConfig && window.CronaConfig.SUBMIT) || null;
+      if (!CRONA_FN_SUBMIT) {
+        console.error('FN_SUBMIT não configurado em assets/js/config.js');
+      }
+
       const j = await resp.json();
       if (!resp.ok || !j.ok) throw new Error(j.error || 'Falha ao enviar');
 
