@@ -4,7 +4,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const setStatus = (msg, ok = true) => {
     if (!statusEl) return;
     statusEl.textContent = msg;
-    statusEl.className = ok ? 'text-sm text-emerald-700' : 'text-sm text-rose-700';
+    statusEl.className = ok
+      ? 'text-sm text-emerald-700'
+      : 'text-sm text-rose-700';
   };
   const yearEl = document.getElementById('year');
   if (yearEl) yearEl.textContent = new Date().getFullYear();
@@ -16,18 +18,40 @@ document.addEventListener('DOMContentLoaded', () => {
   const eTelInput = document.querySelector('input[name="emergencia_telefone"]');
 
   const cpfMask = cpfInput ? IMask(cpfInput, { mask: '000.000.000-00' }) : null;
-  const rgMask = rgInput ? IMask(rgInput, { mask: '00.000.000-A', definitions: { A: /[0-9Xx]/ }, prepare: s => s.toUpperCase() }) : null;
-  const telMask = telInput ? IMask(telInput, { mask: '(00) 00000-0000' }) : null;
-  const eTelMask = eTelInput ? IMask(eTelInput, { mask: '(00) 00000-0000' }) : null;
+  const rgMask = rgInput
+    ? IMask(rgInput, {
+        mask: '00.000.000-A',
+        definitions: { A: /[0-9Xx]/ },
+        prepare: s => s.toUpperCase(),
+      })
+    : null;
+  const telMask = telInput
+    ? IMask(telInput, { mask: '(00) 00000-0000' })
+    : null;
+  const eTelMask = eTelInput
+    ? IMask(eTelInput, { mask: '(00) 00000-0000' })
+    : null;
 
   const setWithMask = (name, val) => {
     const el = document.querySelector(`[name="${name}"]`);
     if (!el || val === undefined || val === null || val === '') return;
     const v = String(val);
-    if (name === 'cpf' && cpfMask) { cpfMask.unmaskedValue = v.replace(/\D/g, ''); return; }
-    if (name === 'telefone' && telMask) { telMask.unmaskedValue = v.replace(/\D/g, ''); return; }
-    if (name === 'emergencia_telefone' && eTelMask) { eTelMask.unmaskedValue = v.replace(/\D/g, ''); return; }
-    if (name === 'rg' && rgMask) { rgMask.unmaskedValue = v.replace(/[^0-9X]/gi, '').toUpperCase(); return; }
+    if (name === 'cpf' && cpfMask) {
+      cpfMask.unmaskedValue = v.replace(/\D/g, '');
+      return;
+    }
+    if (name === 'telefone' && telMask) {
+      telMask.unmaskedValue = v.replace(/\D/g, '');
+      return;
+    }
+    if (name === 'emergencia_telefone' && eTelMask) {
+      eTelMask.unmaskedValue = v.replace(/\D/g, '');
+      return;
+    }
+    if (name === 'rg' && rgMask) {
+      rgMask.unmaskedValue = v.replace(/[^0-9X]/gi, '').toUpperCase();
+      return;
+    }
     el.value = v;
   };
 
@@ -50,7 +74,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
       let d = pre.slot_data || '';
       if (/^\d{2}\/\d{2}\/\d{4}$/.test(d)) {
-        const [dd, mm, yyyy] = d.split('/'); d = `${yyyy}-${mm}-${dd}`;
+        const [dd, mm, yyyy] = d.split('/');
+        d = `${yyyy}-${mm}-${dd}`;
       }
       const displayEl = document.getElementById('slot_data_display');
       const hiddenEl = document.getElementById('slot_data');
@@ -59,10 +84,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
       setWithMask('slot_local', pre.slot_local || '');
 
-      cpfMask?.updateValue(); telMask?.updateValue(); eTelMask?.updateValue(); rgMask?.updateValue();
+      cpfMask?.updateValue();
+      telMask?.updateValue();
+      eTelMask?.updateValue();
+      rgMask?.updateValue();
     }
   } catch (e) {
-    console.warn('Prefill inválido', e); pre = null;
+    console.warn('Prefill inválido', e);
+    pre = null;
   }
 
   // ---------------- elementos do form ----------------
@@ -82,9 +111,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const rect = canvas.getBoundingClientRect();
     const w = Math.max(1, Math.floor(rect.width));
     const h = Math.max(1, Math.floor(rect.height));
-    if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; }
-    ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.strokeStyle = '#111827'; ctx.lineWidth = 2; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; hasSignature = false;
+    if (canvas.width !== w || canvas.height !== h) {
+      canvas.width = w;
+      canvas.height = h;
+    }
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.strokeStyle = '#111827';
+    ctx.lineWidth = 2;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    hasSignature = false;
   }
   function getPos(e) {
     const rect = canvas.getBoundingClientRect();
@@ -92,9 +129,26 @@ document.addEventListener('DOMContentLoaded', () => {
     const clientY = e.touches ? e.touches[0].clientY : e.clientY ?? 0;
     return { x: clientX - rect.left, y: clientY - rect.top };
   }
-  function startDraw(e) { e.preventDefault?.(); drawing = true; const { x, y } = getPos(e); ctx.beginPath(); ctx.moveTo(x, y); hasSignature = true; setStatus('Desenhando…'); }
-  function moveDraw(e) { if (!drawing) return; e.preventDefault?.(); const { x, y } = getPos(e); ctx.lineTo(x, y); ctx.stroke(); }
-  function endDraw() { drawing = false; setStatus('Assinatura registrada no quadro.'); }
+  function startDraw(e) {
+    e.preventDefault?.();
+    drawing = true;
+    const { x, y } = getPos(e);
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    hasSignature = true;
+    setStatus('Desenhando…');
+  }
+  function moveDraw(e) {
+    if (!drawing) return;
+    e.preventDefault?.();
+    const { x, y } = getPos(e);
+    ctx.lineTo(x, y);
+    ctx.stroke();
+  }
+  function endDraw() {
+    drawing = false;
+    setStatus('Assinatura registrada no quadro.');
+  }
 
   canvas.style.touchAction = 'none';
   canvas.addEventListener('pointerdown', startDraw);
@@ -109,7 +163,10 @@ document.addEventListener('DOMContentLoaded', () => {
   canvas.addEventListener('touchmove', moveDraw, { passive: false });
   canvas.addEventListener('touchend', endDraw);
 
-  clearBtn.addEventListener('click', () => { sizeCanvasToCSS(); setStatus('Quadro limpo.'); });
+  clearBtn.addEventListener('click', () => {
+    sizeCanvasToCSS();
+    setStatus('Quadro limpo.');
+  });
   window.addEventListener('resize', sizeCanvasToCSS);
   sizeCanvasToCSS();
 
@@ -121,11 +178,13 @@ document.addEventListener('DOMContentLoaded', () => {
   const makeSigBtn = document.getElementById('makeSigBtn');
 
   if (radios.length) {
-    radios.forEach(r => r.addEventListener('change', () => {
-      sigMode = r.value === 'type' ? 'type' : 'draw';
-      sizeCanvasToCSS();
-      if (typedBox) typedBox.classList.toggle('hidden', sigMode !== 'type');
-    }));
+    radios.forEach(r =>
+      r.addEventListener('change', () => {
+        sigMode = r.value === 'type' ? 'type' : 'draw';
+        sizeCanvasToCSS();
+        if (typedBox) typedBox.classList.toggle('hidden', sigMode !== 'type');
+      }),
+    );
   }
 
   function drawTyped(name) {
@@ -142,7 +201,8 @@ document.addEventListener('DOMContentLoaded', () => {
       hasSignature = true;
       setStatus('Assinatura gerada a partir do nome.');
     };
-    if (document.fonts?.load) document.fonts.load(`${size}px "Pacifico"`).then(drawNow).catch(drawNow);
+    if (document.fonts?.load)
+      document.fonts.load(`${size}px "Pacifico"`).then(drawNow).catch(drawNow);
     else drawNow();
   }
   if (makeSigBtn && typedName) {
@@ -169,52 +229,97 @@ document.addEventListener('DOMContentLoaded', () => {
     setStatus('Validando…');
 
     if (sigMode === 'type' && typedName && !typedName.value.trim()) {
-      setStatus('Digite o nome e clique em "Gerar assinatura".', false); return;
+      setStatus('Digite o nome e clique em "Gerar assinatura".', false);
+      return;
     }
     if (!hasSignature) {
-      setStatus('Por favor, assine (desenho) ou gere a assinatura digitada.', false); return;
+      setStatus(
+        'Por favor, assine (desenho) ou gere a assinatura digitada.',
+        false,
+      );
+      return;
     }
 
     const data = formToJSON(form);
-    if (!data.slot_data) { setStatus('Informe a data do agendamento.', false); return; }
-    if (!data.nome || !data.cpf || !data.data_nascimento || !data.email || !data.telefone) {
-      setStatus('Preencha os campos obrigatórios (nome, CPF, nascimento, e-mail, telefone).', false); return;
+    if (!data.slot_data) {
+      setStatus('Informe a data do agendamento.', false);
+      return;
+    }
+    if (
+      !data.nome ||
+      !data.cpf ||
+      !data.data_nascimento ||
+      !data.email ||
+      !data.telefone
+    ) {
+      setStatus(
+        'Preencha os campos obrigatórios (nome, CPF, nascimento, e-mail, telefone).',
+        false,
+      );
+      return;
     }
 
-    btn.disabled = true; setStatus('Enviando…');
+    btn.disabled = true;
+    setStatus('Enviando…');
 
     try {
       const pngDataUrl = canvas.toDataURL('image/png');
 
       const cpfDigits = String(data.cpf).replace(/\D/g, '');
       const participante = {
-        cpf: cpfDigits, nome: data.nome, rg: data.rg || null, data_nascimento: data.data_nascimento || null,
-        email: data.email, telefone: data.telefone, emergencia_nome: data.emergencia_nome || null,
-        emergencia_telefone: data.emergencia_telefone || null, condicoes_saude: data.condicoes_saude || null,
-        medicamentos: data.medicamentos || null, alergias: data.alergias || null,
+        cpf: cpfDigits,
+        nome: data.nome,
+        rg: data.rg || null,
+        data_nascimento: data.data_nascimento || null,
+        email: data.email,
+        telefone: data.telefone,
+        emergencia_nome: data.emergencia_nome || null,
+        emergencia_telefone: data.emergencia_telefone || null,
+        condicoes_saude: data.condicoes_saude || null,
+        medicamentos: data.medicamentos || null,
+        alergias: data.alergias || null,
       };
       const termo = {
-        slot_data: data.slot_data, slot_local: data.slot_local || null,
-        aceitou_termo: !!data.aceitou_termo, consentiu_lgpd: !!data.consentiu_lgpd,
-        signature_type: sigMode, sig: pre?.sig || null,
+        slot_data: data.slot_data,
+        slot_local: data.slot_local || null,
+        aceitou_termo: !!data.aceitou_termo,
+        consentiu_lgpd: !!data.consentiu_lgpd,
+        signature_type: sigMode,
+        sig: pre?.sig || null,
       };
 
       // --------- CONFIG: ajuste a URL da função de envio ---------
-      const CRONA_FN_SUBMIT = window.CRONA_FN_SUBMIT || 'https://YOUR-PROJECT.functions.supabase.co/submit_consent';
+      const CRONA_FN_SUBMIT =
+        window.CRONA_FN_SUBMIT ||
+        'https://qrtjuypghjbyrbepwvbb.supabase.co/functions/v1/submit_consent';
       const resp = await fetch(CRONA_FN_SUBMIT, {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ participante, termo, assinatura_png_base64: pngDataUrl }),
+        body: JSON.stringify({
+          participante,
+          termo,
+          assinatura_png_base64: pngDataUrl,
+        }),
       });
       const j = await resp.json();
       if (!resp.ok || !j.ok) throw new Error(j.error || 'Falha ao enviar');
 
       setStatus('Assinado e enviado com sucesso! Redirecionando…');
-      form.reset(); cpfMask?.updateValue(); telMask?.updateValue(); eTelMask?.updateValue(); rgMask?.updateValue();
-      sessionStorage.removeItem('prefill'); sizeCanvasToCSS();
-      setTimeout(() => { window.location.href = 'sucesso.html'; }, 500);
+      form.reset();
+      cpfMask?.updateValue();
+      telMask?.updateValue();
+      eTelMask?.updateValue();
+      rgMask?.updateValue();
+      sessionStorage.removeItem('prefill');
+      sizeCanvasToCSS();
+      setTimeout(() => {
+        window.location.href = 'sucesso.html';
+      }, 500);
     } catch (err) {
-      console.error(err); setStatus('Falha ao enviar. Tente novamente.', false);
-    } finally { btn.disabled = false; }
+      console.error(err);
+      setStatus('Falha ao enviar. Tente novamente.', false);
+    } finally {
+      btn.disabled = false;
+    }
   });
 });
