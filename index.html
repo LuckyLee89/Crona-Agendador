@@ -1,19 +1,50 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Crona – Agendador</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
-</head>
-<body class="bg-gray-50 flex items-center justify-center min-h-screen">
-  <main class="max-w-md mx-auto bg-white shadow-xl rounded-2xl p-8 text-center space-y-6">
-    <h1 class="text-2xl font-bold">Bem-vindo ao Crona Agendador</h1>
-    <p class="text-sm text-gray-600">Selecione uma opção abaixo para continuar:</p>
-    <div class="space-y-4">
-      <a href="agendar.html" class="block bg-black text-white rounded-xl py-3 font-semibold hover:bg-gray-800 transition">Fazer Agendamento</a>
-      <a href="painel.html" class="block border border-black rounded-xl py-3 font-semibold hover:bg-gray-100 transition">Criar Agendamento</a>
-    </div>
-  </main>
-</body>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Crona — Agendador</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+    />
+  </head>
+  <body
+    class="bg-emerald-50 text-gray-800 flex items-center justify-center min-h-screen"
+  >
+    <main class="text-center space-y-10">
+      <div>
+        <h1 class="text-4xl font-extrabold text-emerald-700">
+          Crona Agendador
+        </h1>
+        <p class="text-gray-600 mt-2">
+          Sistema simples de agendamento e assinaturas digitais
+        </p>
+      </div>
+
+      <div class="space-y-4">
+        <a
+          href="agendar.html"
+          class="block w-60 mx-auto py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold transition"
+        >
+          Fazer Agendamento
+        </a>
+        <a
+          href="painel.html"
+          class="block w-60 mx-auto py-3 rounded-xl bg-white border border-emerald-500 text-emerald-700 font-semibold hover:bg-emerald-100 transition"
+        >
+          Criar Novo Agendamento
+        </a>
+      </div>
+
+      <footer class="text-gray-500 text-sm pt-8">
+        © <span id="year"></span> Crona — Desenvolvido por
+        <strong>Lincon Pereira</strong>
+      </footer>
+    </main>
+
+    <script>
+      document.getElementById('year').textContent = new Date().getFullYear();
+    </script>
+  </body>
 </html>
