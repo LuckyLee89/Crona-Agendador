@@ -1,53 +1,19 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Crona — Portal de Agendamentos</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
-      rel="stylesheet"
-    />
-    <style>
-      body {
-        font-family: 'Inter', sans-serif;
-      }
-    </style>
-  </head>
-
-  <body
-    class="min-h-screen bg-gray-50 text-gray-900 flex items-center justify-center p-6"
-  >
-    <main
-      class="max-w-lg w-full bg-white shadow-xl rounded-2xl p-8 space-y-6 text-center"
-    >
-      <h1 class="text-3xl font-bold">Crona</h1>
-      <p class="text-sm text-gray-600">Escolha o que deseja fazer:</p>
-
-      <div class="space-y-4 mt-6">
-        <a
-          href="agendar.html"
-          class="block bg-black text-white font-semibold rounded-xl px-6 py-4 hover:bg-gray-900 transition"
-        >
-          ✍️ Assinar Termo de Agendamento
-        </a>
-
-        <a
-          href="painel.html"
-          class="block border border-gray-400 text-gray-800 font-semibold rounded-xl px-6 py-4 hover:bg-gray-100 transition"
-        >
-          ⚙️ Criar Novo Agendamento
-        </a>
-      </div>
-
-      <footer class="mt-8 text-xs text-gray-500 border-t pt-4">
-        <p>© <span id="year"></span> — Crona Agendador</p>
-      </footer>
-    </main>
-
-    <script>
-      document.getElementById('year').textContent = new Date().getFullYear();
-    </script>
-  </body>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crona – Agendador</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+</head>
+<body class="bg-gray-50 flex items-center justify-center min-h-screen">
+  <main class="max-w-md mx-auto bg-white shadow-xl rounded-2xl p-8 text-center space-y-6">
+    <h1 class="text-2xl font-bold">Bem-vindo ao Crona Agendador</h1>
+    <p class="text-sm text-gray-600">Selecione uma opção abaixo para continuar:</p>
+    <div class="space-y-4">
+      <a href="agendar.html" class="block bg-black text-white rounded-xl py-3 font-semibold hover:bg-gray-800 transition">Fazer Agendamento</a>
+      <a href="painel.html" class="block border border-black rounded-xl py-3 font-semibold hover:bg-gray-100 transition">Criar Agendamento</a>
+    </div>
+  </main>
+</body>
 </html>
