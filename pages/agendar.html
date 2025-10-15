@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Crona — Agendador</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/imask"></script>
+  </head>
+  <body class="min-h-screen bg-gray-50 text-gray-900">
+    <main class="max-w-md mx-auto p-6">
+      <h1 class="text-2xl font-semibold mb-2">Confirmar Agendamento</h1>
+      <p class="text-sm text-gray-600 mb-6">
+        Informe seu CPF e a data do agendamento para assinar o termo.
+      </p>
+
+      <form id="agendarForm" class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium">CPF</label>
+          <input
+            name="cpf"
+            placeholder="000.000.000-00"
+            class="mt-1 w-full rounded-xl border-gray-300 px-3 py-2 focus:border-black focus:ring-black"
+            required
+          />
+        </div>
+        <div>
+          <label class="block text-sm font-medium">Data do agendamento</label>
+          <input
+            type="date"
+            name="data"
+            class="mt-1 w-full rounded-xl border-gray-300 px-3 py-2 focus:border-black focus:ring-black"
+            required
+          />
+        </div>
+        <button
+          class="w-full bg-black text-white font-semibold rounded-xl py-3 hover:bg-gray-800"
+          type="submit"
+        >
+          Continuar
+        </button>
+        <p id="msg" class="text-sm mt-2 text-gray-700"></p>
+      </form>
+    </main>
+    <script src="assets/js/config.js"></script>
+    <script src="assets/js/agendar.js"></script>
+  </body>
+</html>

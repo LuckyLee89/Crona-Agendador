@@ -156,19 +156,13 @@ document.addEventListener('DOMContentLoaded', () => {
   canvas.addEventListener('pointerup', endDraw);
   canvas.addEventListener('pointerleave', endDraw);
   canvas.addEventListener('pointercancel', endDraw);
-  canvas.addEventListener('mousedown', startDraw);
-  window.addEventListener('mousemove', moveDraw);
-  window.addEventListener('mouseup', endDraw);
-  canvas.addEventListener('touchstart', startDraw, { passive: false });
-  canvas.addEventListener('touchmove', moveDraw, { passive: false });
-  canvas.addEventListener('touchend', endDraw);
+  window.addEventListener('resize', sizeCanvasToCSS);
+  sizeCanvasToCSS();
 
   clearBtn.addEventListener('click', () => {
     sizeCanvasToCSS();
     setStatus('Quadro limpo.');
   });
-  window.addEventListener('resize', sizeCanvasToCSS);
-  sizeCanvasToCSS();
 
   // ---------------- assinatura digitada ----------------
   let sigMode = 'draw';
@@ -252,10 +246,7 @@ document.addEventListener('DOMContentLoaded', () => {
       !data.email ||
       !data.telefone
     ) {
-      setStatus(
-        'Preencha os campos obrigatórios (nome, CPF, nascimento, e-mail, telefone).',
-        false,
-      );
+      setStatus('Preencha todos os campos obrigatórios.', false);
       return;
     }
 
@@ -288,27 +279,30 @@ document.addEventListener('DOMContentLoaded', () => {
         sig: pre?.sig || null,
       };
 
-      // --------- CONFIG: ajuste a URL da função de envio ---------
       const CRONA_FN_SUBMIT =
-        (window.CronaConfig && window.CronaConfig.SUBMIT) || null;
-      if (!CRONA_FN_SUBMIT) {
-        console.error('FN_SUBMIT não configurado em assets/js/config.js');
-      }
+        (window.CronaConfig && window.CronaConfig.SUBMIT) ||
+        'https://qrtjuypghjbyrbepwvbb.supabase.co/functions/v1/submit_consent';
+
+      // 🔧 Correção principal: faltava o fetch!
+      const resp = await fetch(CRONA_FN_SUBMIT, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          participante,
+          termo,
+          assinatura_png_base64: pngDataUrl,
+        }),
+      });
 
       const j = await resp.json();
       if (!resp.ok || !j.ok) throw new Error(j.error || 'Falha ao enviar');
 
       setStatus('Assinado e enviado com sucesso! Redirecionando…');
-      form.reset();
-      cpfMask?.updateValue();
-      telMask?.updateValue();
-      eTelMask?.updateValue();
-      rgMask?.updateValue();
       sessionStorage.removeItem('prefill');
+      form.reset();
       sizeCanvasToCSS();
-      setTimeout(() => {
-        window.location.href = 'sucesso.html';
-      }, 500);
+
+      setTimeout(() => (window.location.href = 'sucesso.html'), 800);
     } catch (err) {
       console.error(err);
       setStatus('Falha ao enviar. Tente novamente.', false);
