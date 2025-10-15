@@ -3,46 +3,78 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Crona — Agendador</title>
+    <title>Crona — Confirmar Agendamento</title>
+
     <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
     <script src="https://unpkg.com/imask"></script>
+    <meta name="color-scheme" content="light dark" />
+    <style>
+      body {
+        font-family: 'Inter', sans-serif;
+      }
+    </style>
   </head>
-  <body class="min-h-screen bg-gray-50 text-gray-900">
-    <main class="max-w-md mx-auto p-6">
-      <h1 class="text-2xl font-semibold mb-2">Confirmar Agendamento</h1>
-      <p class="text-sm text-gray-600 mb-6">
-        Informe seu CPF e a data do agendamento para assinar o termo.
-      </p>
+
+  <body
+    class="min-h-screen bg-gray-50 text-gray-900 flex items-center justify-center p-6"
+  >
+    <main class="max-w-md w-full bg-white shadow-xl rounded-2xl p-8 space-y-6">
+      <header class="text-center">
+        <h1 class="text-2xl font-bold">Confirmar Agendamento</h1>
+        <p class="text-sm text-gray-600 mt-1">
+          Informe seu CPF e selecione a data do agendamento para assinar o
+          termo.
+        </p>
+      </header>
 
       <form id="agendarForm" class="space-y-4">
         <div>
           <label class="block text-sm font-medium">CPF</label>
           <input
+            id="cpf"
             name="cpf"
             placeholder="000.000.000-00"
-            class="mt-1 w-full rounded-xl border-gray-300 px-3 py-2 focus:border-black focus:ring-black"
+            class="mt-1 w-full rounded-xl border-gray-300 focus:border-black focus:ring-black px-3 py-2"
             required
           />
         </div>
+
         <div>
           <label class="block text-sm font-medium">Data do agendamento</label>
-          <input
-            type="date"
-            name="data"
-            class="mt-1 w-full rounded-xl border-gray-300 px-3 py-2 focus:border-black focus:ring-black"
+          <select
+            id="slot_data"
+            name="slot_data"
+            class="mt-1 w-full rounded-xl border-gray-300 focus:border-black focus:ring-black px-3 py-2"
             required
-          />
+          >
+            <option value="">Carregando datas…</option>
+          </select>
         </div>
+
         <button
-          class="w-full bg-black text-white font-semibold rounded-xl py-3 hover:bg-gray-800"
-          type="submit"
+          id="consultar"
+          type="button"
+          class="w-full bg-black text-white font-semibold rounded-xl py-3 hover:bg-gray-800 transition"
         >
           Continuar
         </button>
-        <p id="msg" class="text-sm mt-2 text-gray-700"></p>
+
+        <p id="msg" class="text-sm text-gray-700 mt-2"></p>
       </form>
+
+      <footer class="text-center text-xs text-gray-500 pt-4 border-t">
+        <p>© <span id="year"></span> — Crona Agendador</p>
+      </footer>
     </main>
+
     <script src="assets/js/config.js"></script>
     <script src="assets/js/agendar.js"></script>
+    <script>
+      document.getElementById('year').textContent = new Date().getFullYear();
+    </script>
   </body>
 </html>
