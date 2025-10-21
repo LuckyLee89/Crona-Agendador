@@ -31,26 +31,29 @@ document.addEventListener('DOMContentLoaded', () => {
   const eTelMask = eTelInput
     ? IMask(eTelInput, { mask: '(00) 00000-0000' })
     : null;
-
   // ---------------- PREFILL ----------------
-  let pre = null;
   try {
-    pre = JSON.parse(sessionStorage.getItem('prefill') || 'null');
+    const pre = JSON.parse(sessionStorage.getItem('prefill') || 'null');
     if (pre) {
-      const setVal = (n, v) => {
-        const el = document.querySelector(`[name="${n}"]`);
-        if (el && v) el.value = v;
+      const setVal = (name, value) => {
+        const el = document.querySelector(`[name="${name}"]`);
+        if (el && value) el.value = value;
       };
+
       setVal('nome', pre.nome);
       if (cpfMask) cpfMask.unmaskedValue = pre.cpf || '';
-      setVal('slot_local', pre.local);
-      setVal('slot_data', pre.data);
+      setVal('slot_local', pre.slot_local);
+      setVal('slot_data', pre.slot_data);
 
       const dEl = document.getElementById('slot_data_display');
-      if (dEl) dEl.value = pre.data || '';
+      if (dEl) {
+        dEl.removeAttribute('readonly'); // <-- permite editar
+        dEl.classList.remove('bg-gray-100'); // <-- tira cinza
+        dEl.value = pre.slot_data || '';
+      }
     }
-  } catch (e) {
-    console.warn('Erro ao carregar prefill', e);
+  } catch (err) {
+    console.warn('Erro ao carregar prefill', err);
   }
 
   // ---------------- assinatura (canvas) ----------------

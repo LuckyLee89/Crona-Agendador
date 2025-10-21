@@ -35,9 +35,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     dataEl.innerHTML =
       '<option value="">Selecione</option>' +
       data
-        .map(s => `<option value="${s.data}">${s.data} — ${s.local}</option>`)
+        .map(
+          s =>
+            `<option value="${s.data}">
+          ${s.data} — ${s.local}${
+              s.vagas_restantes
+                ? ` (${s.vagas_restantes} vaga${
+                    s.vagas_restantes > 1 ? 's' : ''
+                  } restantes)`
+                : ''
+            }
+        </option>`,
+        )
         .join('');
-    dataEl.disabled = false;
   }
 
   if (!forcedDate) await loadDatas();
