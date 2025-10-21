@@ -11,17 +11,16 @@ document.addEventListener('DOMContentLoaded', async () => {
   const forcedLocal = params.get('local');
   const forcedNome = params.get('nome');
 
-  const { SUPABASE_FUNCTIONS_URL } = window.CronaConfig || {};
+  // 👉 Pega das configs que já estão corretas
+  const { LIST, LOOKUP } = window.CronaConfig;
 
-  // 🔹 1. Carrega as datas disponíveis via Edge Function
+  // 🔹 1. Carrega as datas disponíveis via função list_slots
   async function loadDatas(cpf) {
     dataEl.disabled = true;
     dataEl.innerHTML = '<option>Carregando datas…</option>';
 
     try {
-      const res = await fetch(
-        `${SUPABASE_FUNCTIONS_URL}/list_slots${cpf ? `?cpf=${cpf}` : ''}`,
-      );
+      const res = await fetch(cpf ? `${LIST}?cpf=${cpf}` : LIST);
       const json = await res.json();
 
       if (!json.ok || !json.items?.length) {
@@ -83,8 +82,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     msgEl.className = 'mt-3 text-sm text-gray-600';
 
     try {
-      // 🧠 Consulta a Edge Function lookup_cpf
-      const resp = await fetch(`${SUPABASE_FUNCTIONS_URL}/lookup_cpf`, {
+      // 🧠 Usa agora o endpoint correto
+      const resp = await fetch(LOOKUP, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ cpf: cpfDigits, slot_data }),
@@ -98,7 +97,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
       }
 
-      // Se já cadastrado mas não assinou, ou for novo → ir para termo
+      // Se já cadastrado mas não assinou, ou for novo → vai pro termo
       const prefill = {
         cpf: cpfDigits,
         nome: forcedNome || '',
