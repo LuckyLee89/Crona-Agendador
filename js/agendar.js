@@ -83,11 +83,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     try {
       const { data, error } = await supabaseClient
-        .from('participantes')
+        .from('termos_assinados')
         .select('*')
         .eq('cpf', cpfDigits)
         .eq('slot_data', slot_data)
-        .single();
+        .maybeSingle();
 
       if (error && error.code !== 'PGRST116') throw error;
 
