@@ -1,73 +1,63 @@
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   const form = document.getElementById('painelForm');
   const msg = document.getElementById('msg');
   const linkBox = document.getElementById('linkBox');
   const linkOut = document.getElementById('linkOut');
   const copyBtn = document.getElementById('copyBtn');
 
-  // Lê de env.js OU de CronaConfig, o que existir
-  const cfg = window.env || window.CronaConfig || {};
-  const SUPABASE_URL = cfg.SUPABASE_URL;
-  const SUPABASE_KEY = cfg.SUPABASE_KEY;
+  const cfg = window.env || {};
+  const supa = window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_KEY);
 
-  const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-  // Máscara CPF (só aplica se IMask está carregado)
+  // Máscaras
   const cpfEl = form.querySelector('input[name="cpf"]');
-  if (window.IMask && cpfEl) IMask(cpfEl, { mask: '000.000.000-00' });
+  const dataEl = form.querySelector('input[name="data"]');
+  if (window.IMask) {
+    IMask(cpfEl, { mask: '000.000.000-00' });
+    IMask(dataEl, { mask: '00/00/0000' });
+  }
 
   form.addEventListener('submit', async e => {
     e.preventDefault();
-    msg.textContent = '';
-
+    const cpf = cpfEl.value.replace(/\D/g, '');
     const nome = form.nome.value.trim();
-    const cpf = form.cpf.value.replace(/\D/g, '');
-    const data = form.data.value.trim();
     const local = form.local.value.trim();
-    const vagas = Number(form.vagas.value || 0);
+    const data = form.data.value.trim();
 
-    if (!nome || !cpf || !data || !local) {
-      msg.textContent = 'Preencha todos os campos obrigatórios.';
-      msg.className = 'text-rose-700';
+    if (!cpf || !nome || !local || !data) {
+      msg.textContent = 'Preencha todos os campos.';
+      msg.className = 'text-sm text-rose-600 mt-2';
       return;
     }
 
-    msg.textContent = 'Salvando no Supabase...';
-    msg.className = 'text-gray-600';
+    msg.textContent = 'Salvando...';
+    msg.className = 'text-sm text-gray-600 mt-2';
 
-    const { error } = await client.from('slots').insert([
-      {
-        data,
-        local,
-        ativo: true,
-        vagas_restantes: vagas,
-        criador_nome: nome,
-        criador_cpf: cpf,
-      },
-    ]);
+    try {
+      const { error } = await supa
+        .from('slots')
+        .insert([{ cpf, nome, local, data, ativo: true }]);
+      if (error) throw error;
 
-    if (error) {
+      const link = `${
+        window.location.origin
+      }/agendar.html?cpf=${cpf}&nome=${encodeURIComponent(
+        nome,
+      )}&local=${encodeURIComponent(local)}&data=${encodeURIComponent(data)}`;
+      linkOut.href = link;
+      linkOut.textContent = link;
+      linkBox.classList.remove('hidden');
+      msg.textContent = 'Agendamento criado com sucesso!';
+      msg.className = 'text-sm text-emerald-600 mt-2';
+    } catch (err) {
       msg.textContent = 'Erro ao salvar agendamento.';
-      msg.className = 'text-rose-700';
-      console.error(error);
-      return;
+      msg.className = 'text-sm text-rose-600 mt-2';
+      console.error(err);
     }
-
-    const link = `${
-      window.location.origin
-    }/Crona-Agendador/agendar.html?data=${encodeURIComponent(
-      data,
-    )}&local=${encodeURIComponent(local)}`;
-
-    linkOut.value = link;
-    linkBox.classList.remove('hidden');
-    msg.textContent = 'Agendamento criado com sucesso!';
-    msg.className = 'text-emerald-700';
   });
 
   copyBtn.addEventListener('click', () => {
-    navigator.clipboard.writeText(linkOut.value);
-    msg.textContent = 'Link copiado!';
-    msg.className = 'text-emerald-700';
+    navigator.clipboard.writeText(linkOut.textContent);
+    copyBtn.textContent = 'Copiado!';
+    setTimeout(() => (copyBtn.textContent = 'Copiar Link'), 2000);
   });
 });
