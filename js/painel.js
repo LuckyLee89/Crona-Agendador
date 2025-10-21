@@ -5,12 +5,16 @@ document.addEventListener('DOMContentLoaded', () => {
   const linkOut = document.getElementById('linkOut');
   const copyBtn = document.getElementById('copyBtn');
 
-  const { SUPABASE_URL, SUPABASE_KEY } = window.CronaConfig;
+  // Lê de env.js OU de CronaConfig, o que existir
+  const cfg = window.env || window.CronaConfig || {};
+  const SUPABASE_URL = cfg.SUPABASE_URL;
+  const SUPABASE_KEY = cfg.SUPABASE_KEY;
+
   const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  // Máscara CPF
+  // Máscara CPF (só aplica se IMask está carregado)
   const cpfEl = form.querySelector('input[name="cpf"]');
-  if (window.IMask) IMask(cpfEl, { mask: '000.000.000-00' });
+  if (window.IMask && cpfEl) IMask(cpfEl, { mask: '000.000.000-00' });
 
   form.addEventListener('submit', async e => {
     e.preventDefault();
@@ -31,18 +35,16 @@ document.addEventListener('DOMContentLoaded', () => {
     msg.textContent = 'Salvando no Supabase...';
     msg.className = 'text-gray-600';
 
-    const { error } = await client
-      .from('slots')
-      .insert([
-        {
-          data,
-          local,
-          ativo: true,
-          vagas_restantes: vagas,
-          criador_nome: nome,
-          criador_cpf: cpf,
-        },
-      ]);
+    const { error } = await client.from('slots').insert([
+      {
+        data,
+        local,
+        ativo: true,
+        vagas_restantes: vagas,
+        criador_nome: nome,
+        criador_cpf: cpf,
+      },
+    ]);
 
     if (error) {
       msg.textContent = 'Erro ao salvar agendamento.';

@@ -5,8 +5,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   const msgEl = document.getElementById('msg');
   const btn = document.getElementById('consultar');
 
-  // Máscara de CPF
-  if (window.IMask) IMask(cpfEl, { mask: '000.000.000-00' });
+  const cpfInput = document.getElementById('cpf');
+  if (window.IMask && cpfInput) IMask(cpfInput, { mask: '000.000.000-00' });
 
   // Params (quando vem de link)
   const params = new URLSearchParams(window.location.search);

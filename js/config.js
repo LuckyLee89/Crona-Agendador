@@ -1,7 +1,3 @@
-// js/config.js
-// Configuração central do Crona. Segura para portfólio.
-// Use um arquivo local 'env.js' (não comitar) para definir suas chaves reais.
-// Exemplo em 'env-example.js'.
 (function () {
   const env = window.env || {};
 
