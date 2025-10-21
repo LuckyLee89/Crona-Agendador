@@ -3,21 +3,23 @@ document.addEventListener('DOMContentLoaded', async () => {
   const msg = document.getElementById('resultado');
   if (!form) return;
 
+  // Supabase
   const cfg = window.env || {};
   const supa = window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_KEY);
 
+  // Máscara CPF
   const cpfEl = form.querySelector('input[name="cpf"]');
   if (window.IMask && cpfEl) IMask(cpfEl, { mask: '000.000.000-00' });
 
   form.addEventListener('submit', async e => {
     e.preventDefault();
 
-    const cpf = cpfEl.value.replace(/\D/g, '');
     const nome = form.nome.value.trim();
+    const cpf = (form.cpf.value || '').replace(/\D/g, '');
     const local = form.local.value.trim();
     const data = form.data.value.trim();
 
-    if (!cpf || !nome || !local || !data) {
+    if (!nome || !cpf || !local || !data) {
       msg.textContent = 'Preencha todos os campos.';
       msg.className = 'text-sm text-rose-600 mt-2';
       return;
@@ -27,7 +29,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     msg.className = 'text-sm text-gray-600 mt-2';
 
     try {
-      // 🔧 Caminho completo (ajuste o nome conforme o repositório no GitHub Pages)
+      const { error } = await supa
+        .from('slots')
+        .insert([{ cpf, nome, local, data, ativo: true }]);
+      if (error) throw error;
+
+      // Monta link completo (ajuste o nome do repositório se necessário)
       const base = `${window.location.origin}/Crona-Agendador`;
       const link = `${base}/agendar.html?cpf=${cpf}&nome=${encodeURIComponent(
         nome,
@@ -42,15 +49,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       `;
 
       const copyBtn = document.getElementById('copyBtn');
-      if (copyBtn) {
-        copyBtn.addEventListener('click', () => {
-          navigator.clipboard.writeText(link);
-          copyBtn.textContent = 'Copiado!';
-          setTimeout(() => (copyBtn.textContent = 'Copiar Link'), 2000);
-        });
-      }
-
-      msg.className = 'text-sm text-emerald-700 mt-2';
+      copyBtn?.addEventListener('click', () => {
+        navigator.clipboard.writeText(link);
+        copyBtn.textContent = 'Copiado!';
+        setTimeout(() => (copyBtn.textContent = 'Copiar Link'), 2000);
+      });
     } catch (err) {
       console.error(err);
       msg.textContent = 'Erro ao gerar link.';
