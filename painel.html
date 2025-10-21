@@ -3,102 +3,71 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Crona — Criar Agendamento</title>
+    <title>Painel — Gerar Link de Agendamento</title>
+
     <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio,line-clamp"></script>
     <script>
       tailwind.config = {
         theme: {
-          extend: {
-            colors: {
-              emerald: { 600: '#059669', 700: '#047857' },
-            },
-          },
+          extend: { colors: { emerald: { 600: '#059669', 700: '#047857' } } },
         },
       };
     </script>
-
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
-      rel="stylesheet"
-    />
-    <style>
-      body {
-        font-family: 'Inter', sans-serif;
-      }
-    </style>
   </head>
-  <body
-    class="min-h-screen bg-gray-50 text-gray-900 flex items-center justify-center p-6"
-  >
-    <main class="max-w-lg w-full bg-white shadow-xl rounded-2xl p-8 space-y-6">
-      <header class="text-center">
-        <h1 class="text-2xl font-bold">Criar Agendamento</h1>
-        <p class="text-sm text-gray-600 mt-1">
-          Gere um link personalizado e envie para o participante assinar.
-        </p>
-      </header>
 
-      <form id="linkForm" class="space-y-4">
-        <div>
-          <label class="block text-sm font-medium">Nome do participante</label>
-          <input
-            name="nome"
-            placeholder="Ex.: Ana Souza"
-            class="mt-1 w-full rounded-xl border-gray-300 focus:border-black focus:ring-black px-3 py-2"
-            required
-          />
-        </div>
-        <div>
-          <label class="block text-sm font-medium">CPF</label>
-          <input
-            name="cpf"
-            type="text"
-            autocomplete="off"
-            placeholder="000.000.000-00"
-          />
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label class="block text-sm font-medium">Data</label>
-            <input
-              type="date"
-              name="data"
-              class="mt-1 w-full rounded-xl border-gray-300 focus:border-black focus:ring-black px-3 py-2"
-              required
-            />
-          </div>
-          <div>
-            <label class="block text-sm font-medium">Local</label>
-            <input
-              name="local"
-              placeholder="Ex.: Sala 2 — Unidade Centro"
-              class="mt-1 w-full rounded-xl border-gray-300 focus:border-black focus:ring-black px-3 py-2"
-              required
-            />
-          </div>
-        </div>
+  <body
+    class="min-h-screen bg-emerald-50 text-gray-900 flex items-center justify-center"
+  >
+    <main class="bg-white shadow-lg rounded-2xl p-6 w-full max-w-md">
+      <h1 class="text-2xl font-bold mb-4 text-emerald-700 text-center">
+        Gerar Link de Agendamento
+      </h1>
+
+      <form id="painelForm" class="space-y-3">
+        <input
+          name="cpf"
+          placeholder="CPF"
+          class="w-full rounded-xl border-gray-300 px-3 py-2"
+        />
+        <input
+          name="nome"
+          placeholder="Nome"
+          class="w-full rounded-xl border-gray-300 px-3 py-2"
+        />
+        <input
+          name="local"
+          placeholder="Local"
+          class="w-full rounded-xl border-gray-300 px-3 py-2"
+        />
+        <input
+          name="data"
+          placeholder="Data (dd/mm/aaaa)"
+          class="w-full rounded-xl border-gray-300 px-3 py-2"
+        />
 
         <button
-          type="submit"
-          class="w-full bg-black text-white font-semibold rounded-xl py-3 hover:bg-gray-800 transition"
+          class="w-full rounded-xl bg-emerald-700 text-white py-2 font-semibold"
         >
           Gerar Link
         </button>
       </form>
 
-      <div id="resultado" class="text-center text-sm text-gray-800"></div>
-
-      <footer class="text-center text-xs text-gray-500 pt-4 border-t">
-        <p>© <span id="year"></span> — Crona Agendador</p>
-      </footer>
+      <p id="msg" class="text-sm mt-3"></p>
+      <div id="linkBox" class="hidden mt-3">
+        <a id="linkOut" href="#" class="text-blue-600 break-all underline"></a>
+        <button
+          id="copyBtn"
+          class="mt-2 bg-black text-white px-3 py-1 rounded-lg"
+        >
+          Copiar Link
+        </button>
+      </div>
     </main>
-    <script src="https://unpkg.com/imask"></script>
+
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.1/dist/umd/supabase.min.js"></script>
+    <script src="https://unpkg.com/imask"></script>
     <script src="js/env.js"></script>
     <script src="js/config.js"></script>
     <script src="js/painel.js"></script>
-    <script>
-      document.getElementById('year').textContent = new Date().getFullYear();
-    </script>
   </body>
 </html>
