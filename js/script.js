@@ -47,9 +47,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const dEl = document.getElementById('slot_data_display');
       if (dEl) {
-        dEl.removeAttribute('readonly'); // <-- permite editar
-        dEl.classList.remove('bg-gray-100'); // <-- tira cinza
         dEl.value = pre.slot_data || '';
+        dEl.readOnly = true;
+        dEl.classList.add('bg-gray-100', 'cursor-not-allowed');
       }
     }
   } catch (err) {
