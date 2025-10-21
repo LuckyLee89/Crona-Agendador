@@ -6,7 +6,19 @@
     <title>Crona — Termo de Consentimento e Responsabilidade</title>
 
     <!-- Estilos -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio,line-clamp"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              emerald: { 600: '#059669', 700: '#047857' },
+            },
+          },
+        },
+      };
+    </script>
+
     <link rel="icon" href="data:," />
     <link
       href="https://fonts.googleapis.com/css2?family=Allura&family=Pacifico&display=swap"

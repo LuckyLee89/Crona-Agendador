@@ -1,38 +1,21 @@
 document.addEventListener('DOMContentLoaded', async () => {
   const cpfEl = document.getElementById('cpf');
-  const localEl = document.getElementById('slot_local');
   const dataEl = document.getElementById('slot_data');
   const msgEl = document.getElementById('msg');
   const btn = document.getElementById('consultar');
 
-  const cpfInput = document.getElementById('cpf');
-  if (window.IMask && cpfInput) IMask(cpfInput, { mask: '000.000.000-00' });
+  if (window.IMask && cpfEl) IMask(cpfEl, { mask: '000.000.000-00' });
 
-  // Params (quando vem de link)
   const params = new URLSearchParams(window.location.search);
   const forcedDate = params.get('data');
   const forcedLocal = params.get('local');
-  const sigParam = params.get('sig');
+  const forcedNome = params.get('nome');
 
-  // Config Supabase
   const { SUPABASE_URL, SUPABASE_KEY } = window.CronaConfig || {};
   const supabaseClient = window.supabase.createClient(
     SUPABASE_URL,
     SUPABASE_KEY,
   );
-
-  // Se vier via link, trava campos e preenche
-  if (forcedDate) {
-    dataEl.value = forcedDate;
-    dataEl.disabled = true;
-  } else {
-    await loadDatas();
-  }
-
-  if (forcedLocal) {
-    localEl.value = decodeURIComponent(forcedLocal);
-    localEl.disabled = true;
-  }
 
   async function loadDatas() {
     dataEl.disabled = true;
@@ -52,20 +35,25 @@ document.addEventListener('DOMContentLoaded', async () => {
     dataEl.innerHTML =
       '<option value="">Selecione</option>' +
       data
-        .map(
-          s =>
-            `<option value="${s.data}">${s.data} — ${s.local} (${
-              s.vagas_restantes ?? 0
-            } vagas)</option>`,
-        )
+        .map(s => `<option value="${s.data}">${s.data} — ${s.local}</option>`)
         .join('');
-
     dataEl.disabled = false;
+  }
+
+  if (!forcedDate) await loadDatas();
+  else {
+    const opt = document.createElement('option');
+    opt.value = forcedDate;
+    opt.textContent = forcedDate;
+    opt.selected = true;
+    dataEl.appendChild(opt);
+    dataEl.disabled = true;
   }
 
   btn.addEventListener('click', async () => {
     const cpfDigits = cpfEl.value.replace(/\D/g, '');
     const slot_data = dataEl.value.trim();
+    const slot_local = forcedLocal || '';
 
     if (cpfDigits.length !== 11) {
       msgEl.textContent = 'CPF inválido.';
@@ -98,8 +86,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       const prefill = {
         cpf: cpfDigits,
+        nome: forcedNome || '',
         slot_data,
-        sig: sigParam || null,
+        slot_local,
         _ts: Date.now(),
       };
       sessionStorage.setItem('prefill', JSON.stringify(prefill));
