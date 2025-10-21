@@ -11,43 +11,45 @@ document.addEventListener('DOMContentLoaded', async () => {
   const forcedLocal = params.get('local');
   const forcedNome = params.get('nome');
 
-  const { SUPABASE_URL, SUPABASE_KEY } = window.CronaConfig || {};
-  const supabaseClient = window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_KEY,
-  );
+  const { SUPABASE_FUNCTIONS_URL } = window.CronaConfig || {};
 
-  async function loadDatas() {
+  // 🔹 1. Carrega as datas disponíveis via Edge Function
+  async function loadDatas(cpf) {
     dataEl.disabled = true;
     dataEl.innerHTML = '<option>Carregando datas…</option>';
 
-    const { data, error } = await supabaseClient
-      .from('slots')
-      .select('*')
-      .eq('ativo', true)
-      .order('data', { ascending: true });
+    try {
+      const res = await fetch(
+        `${SUPABASE_FUNCTIONS_URL}/list_slots${cpf ? `?cpf=${cpf}` : ''}`,
+      );
+      const json = await res.json();
 
-    if (error || !data?.length) {
-      dataEl.innerHTML = '<option>Sem datas disponíveis</option>';
-      return;
+      if (!json.ok || !json.items?.length) {
+        dataEl.innerHTML = '<option>Sem datas disponíveis</option>';
+        return;
+      }
+
+      dataEl.innerHTML =
+        '<option value="">Selecione</option>' +
+        json.items
+          .map(
+            s =>
+              `<option value="${s.data}">
+                ${s.data} — ${s.local}${
+                s.vagas_restantes
+                  ? ` (${s.vagas_restantes} vaga${
+                      s.vagas_restantes > 1 ? 's' : ''
+                    } restantes)`
+                  : ''
+              }
+              </option>`,
+          )
+          .join('');
+      dataEl.disabled = false;
+    } catch (err) {
+      console.error(err);
+      dataEl.innerHTML = '<option>Erro ao carregar</option>';
     }
-
-    dataEl.innerHTML =
-      '<option value="">Selecione</option>' +
-      data
-        .map(
-          s =>
-            `<option value="${s.data}">
-          ${s.data} — ${s.local}${
-              s.vagas_restantes
-                ? ` (${s.vagas_restantes} vaga${
-                    s.vagas_restantes > 1 ? 's' : ''
-                  } restantes)`
-                : ''
-            }
-        </option>`,
-        )
-        .join('');
   }
 
   if (!forcedDate) await loadDatas();
@@ -60,6 +62,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     dataEl.disabled = true;
   }
 
+  // 🔹 2. Clique do botão "Continuar"
   btn.addEventListener('click', async () => {
     const cpfDigits = cpfEl.value.replace(/\D/g, '');
     const slot_data = dataEl.value.trim();
@@ -80,20 +83,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     msgEl.className = 'mt-3 text-sm text-gray-600';
 
     try {
-      const { data, error } = await supabaseClient
-        .from('termos_assinados')
-        .select('*')
-        .eq('cpf', cpfDigits)
-        .eq('slot_data', slot_data)
-        .maybeSingle();
+      // 🧠 Consulta a Edge Function lookup_cpf
+      const resp = await fetch(`${SUPABASE_FUNCTIONS_URL}/lookup_cpf`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cpf: cpfDigits, slot_data }),
+      });
 
-      if (error && error.code !== 'PGRST116') throw error;
+      const result = await resp.json();
+      console.log('[lookup_cpf]', result);
 
-      if (data && data.assinado) {
+      if (result.status === 'SIGNED_FOR_DATE') {
         window.location.href = 'ja-assinou.html';
         return;
       }
 
+      // Se já cadastrado mas não assinou, ou for novo → ir para termo
       const prefill = {
         cpf: cpfDigits,
         nome: forcedNome || '',
