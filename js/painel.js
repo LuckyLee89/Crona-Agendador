@@ -8,8 +8,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   form.insertAdjacentElement('afterend', filtro);
   filtro.insertAdjacentElement('afterend', tabela);
 
-  const { CREATE_LINK, LIST, SUPABASE_URL, SUPABASE_KEY, TABLE_SLOTS } =
-    window.CronaConfig;
+  const {
+    CREATE_LINK,
+    LIST,
+    SUPABASE_URL,
+    SUPABASE_KEY,
+    TABLE_SLOTS,
+    TOGGLE_SLOT,
+  } = window.CronaConfig;
+
   const supa = window.supa;
 
   let intervalId = null; // para o auto-refresh
@@ -29,7 +36,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     try {
       const resp = await fetch(CREATE_LINK, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          apikey: window.CronaConfig.SUPABASE_KEY, // 🔑 envia a anon key
+        },
         body: JSON.stringify({
           data,
           local,
