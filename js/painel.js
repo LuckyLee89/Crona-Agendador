@@ -38,7 +38,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          apikey: window.CronaConfig.SUPABASE_KEY, // 🔑 envia a anon key
+          Authorization: `Bearer ${window.CronaConfig.SUPABASE_KEY}`,
+          apikey: window.CronaConfig.SUPABASE_KEY,
         },
         body: JSON.stringify({
           data,
