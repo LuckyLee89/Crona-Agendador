@@ -29,7 +29,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     try {
       const resp = await fetch(CREATE_LINK, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${window.env.SUPABASE_KEY}`,
+        },
         body: JSON.stringify({ nome, cpf, local, data }),
       });
 
