@@ -48,25 +48,6 @@
       </header>
 
       <form id="linkForm" class="space-y-4">
-        <div>
-          <label class="block text-sm font-medium">Nome do participante</label>
-          <input
-            name="nome"
-            placeholder="Ex.: Ana Souza"
-            class="mt-1 w-full rounded-xl border-gray-300 focus:border-black focus:ring-black px-3 py-2"
-            required
-          />
-        </div>
-        <div>
-          <label class="block text-sm font-medium">CPF</label>
-          <input
-            name="cpf"
-            type="text"
-            autocomplete="off"
-            placeholder="000.000.000-00"
-            class="mt-1 w-full rounded-xl border-gray-300 focus:border-black focus:ring-black px-3 py-2"
-          />
-        </div>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label class="block text-sm font-medium">Data</label>
@@ -81,18 +62,51 @@
             <label class="block text-sm font-medium">Local</label>
             <input
               name="local"
-              placeholder="Ex.: Sala 2 — Unidade Centro"
+              placeholder="Ex.: Auditório Central"
               class="mt-1 w-full rounded-xl border-gray-300 focus:border-black focus:ring-black px-3 py-2"
               required
             />
           </div>
         </div>
 
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium">Horário Início</label>
+            <input
+              type="time"
+              name="horario_inicio"
+              required
+              class="mt-1 w-full rounded-xl border-gray-300 focus:border-black focus:ring-black px-3 py-2"
+            />
+          </div>
+          <div>
+            <label class="block text-sm font-medium">Horário Fim</label>
+            <input
+              type="time"
+              name="horario_fim"
+              required
+              class="mt-1 w-full rounded-xl border-gray-300 focus:border-black focus:ring-black px-3 py-2"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium">Vagas Totais</label>
+          <input
+            type="number"
+            name="vagas"
+            min="1"
+            value="10"
+            required
+            class="mt-1 w-full rounded-xl border-gray-300 focus:border-black focus:ring-black px-3 py-2"
+          />
+        </div>
+
         <button
           type="submit"
           class="w-full bg-black text-white font-semibold rounded-xl py-3 hover:bg-gray-800 transition"
         >
-          Gerar Link
+          Criar Agendamento
         </button>
       </form>
 

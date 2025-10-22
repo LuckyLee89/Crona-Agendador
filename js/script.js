@@ -57,6 +57,29 @@ document.addEventListener('DOMContentLoaded', () => {
     console.warn('Erro ao carregar prefill', err);
   }
 
+  // Se vier via querystring (ex: ?data=2025-11-02&local=Sala%203)
+  const params = new URLSearchParams(window.location.search);
+  if (params.has('data')) {
+    const dataVal = params.get('data');
+    const dataEl = document.getElementById('slot_data_display');
+    const hiddenData = document.getElementById('slot_data');
+    if (dataEl && hiddenData) {
+      dataEl.value = dataVal;
+      hiddenData.value = dataVal;
+      dataEl.readOnly = true;
+      dataEl.classList.add('bg-gray-100', 'cursor-not-allowed');
+    }
+  }
+  if (params.has('local')) {
+    const localVal = decodeURIComponent(params.get('local'));
+    const localEl = document.querySelector('[name="slot_local"]');
+    if (localEl) {
+      localEl.value = localVal;
+      localEl.readOnly = true;
+      localEl.classList.add('bg-gray-100', 'cursor-not-allowed');
+    }
+  }
+
   // assinatura
   const form = document.getElementById('termoForm');
   const btn = document.getElementById('submitBtn');
@@ -135,6 +158,12 @@ document.addEventListener('DOMContentLoaded', () => {
     drawTyped(name);
   });
 
+  typedName.addEventListener('input', () => {
+    if (sigMode === 'type' && typedName.value.trim().length > 0) {
+      drawTyped(typedName.value.trim());
+    }
+  });
+
   // submit
   const { SUBMIT } = window.CronaConfig;
 
@@ -155,7 +184,10 @@ document.addEventListener('DOMContentLoaded', () => {
       const resp = await fetch(SUBMIT, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(obj),
+        body: JSON.stringify({
+          ...obj,
+          created_at: new Date().toISOString(),
+        }),
       });
       const j = await resp.json();
       if (!resp.ok || !j.ok) throw new Error(j.error || 'Falha ao enviar');
