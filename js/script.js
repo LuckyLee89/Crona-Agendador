@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-  // ---------------- status + ano ----------------
+  // status + ano
   const statusEl = document.getElementById('status');
   const setStatus = (msg, ok = true) => {
     if (!statusEl) return;
@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const yearEl = document.getElementById('year');
   if (yearEl) yearEl.textContent = new Date().getFullYear();
 
-  // ---------------- máscaras ----------------
+  // máscaras
   const cpfInput = document.querySelector('input[name="cpf"]');
   const rgInput = document.querySelector('input[name="rg"]');
   const telInput = document.querySelector('input[name="telefone"]');
@@ -31,7 +31,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const eTelMask = eTelInput
     ? IMask(eTelInput, { mask: '(00) 00000-0000' })
     : null;
-  // ---------------- PREFILL ----------------
+
+  // prefill
   try {
     const pre = JSON.parse(sessionStorage.getItem('prefill') || 'null');
     if (pre) {
@@ -56,7 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
     console.warn('Erro ao carregar prefill', err);
   }
 
-  // ---------------- assinatura (canvas) ----------------
+  // assinatura
   const form = document.getElementById('termoForm');
   const btn = document.getElementById('submitBtn');
   const canvas = document.getElementById('signature');
@@ -103,7 +104,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setStatus('Quadro limpo.');
   });
 
-  // ---------------- assinatura digitada ----------------
+  // assinatura digitada
   let sigMode = 'draw';
   const radios = document.querySelectorAll('input[name="sigMode"]');
   const typedBox = document.getElementById('typedBox');
@@ -134,7 +135,9 @@ document.addEventListener('DOMContentLoaded', () => {
     drawTyped(name);
   });
 
-  // ---------------- submit ----------------
+  // submit
+  const { SUBMIT } = window.CronaConfig;
+
   form.addEventListener('submit', async e => {
     e.preventDefault();
     if (!hasSignature) return setStatus('Assine antes de enviar.', false);
@@ -147,15 +150,13 @@ document.addEventListener('DOMContentLoaded', () => {
       const obj = {};
       for (const [k, v] of data.entries()) obj[k] = v;
       obj.assinatura = assinatura;
+      obj.sigMode = sigMode;
 
-      const resp = await fetch(
-        'https://msroqrlrwtvylxecbmgm.functions.supabase.co/submit_termo',
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(obj),
-        },
-      );
+      const resp = await fetch(SUBMIT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(obj),
+      });
       const j = await resp.json();
       if (!resp.ok || !j.ok) throw new Error(j.error || 'Falha ao enviar');
 

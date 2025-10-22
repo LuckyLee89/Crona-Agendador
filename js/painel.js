@@ -3,9 +3,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const msg = document.getElementById('resultado');
   if (!form) return;
 
-  // Supabase
-  const cfg = window.env || {};
-  const supa = window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_KEY);
+  const { CREATE_LINK } = window.CronaConfig;
 
   // Máscara CPF
   const cpfEl = form.querySelector('input[name="cpf"]');
@@ -29,17 +27,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     msg.className = 'text-sm text-gray-600 mt-2';
 
     try {
-      const { error } = await supa
-        .from('slots')
-        .insert([{ cpf, nome, local, data, ativo: true }]);
-      if (error) throw error;
+      const resp = await fetch(CREATE_LINK, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nome, cpf, local, data }),
+      });
 
-      // Monta link completo (ajuste o nome do repositório se necessário)
-      const base = `${window.location.origin}/Crona-Agendador`;
-      const link = `${base}/agendar.html?cpf=${cpf}&nome=${encodeURIComponent(
-        nome,
-      )}&local=${encodeURIComponent(local)}&data=${encodeURIComponent(data)}`;
+      const json = await resp.json();
+      if (!json.ok) throw new Error(json.error || 'Falha ao gerar link.');
 
+      const link = json.link;
       msg.innerHTML = `
         <p class="text-emerald-700 font-semibold mt-2">Link gerado com sucesso!</p>
         <a href="${link}" target="_blank" class="text-blue-600 underline break-all block mt-1">${link}</a>
