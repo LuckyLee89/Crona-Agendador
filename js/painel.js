@@ -5,8 +5,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   filtro.className = 'flex flex-col md:flex-row gap-3 mt-8';
   const tabela = document.createElement('table');
   tabela.className = 'w-full text-sm text-left border mt-4 hidden';
-  form.insertAdjacentElement('afterend', filtro);
-  filtro.insertAdjacentElement('afterend', tabela);
+  document.getElementById('painelAgendamentos').appendChild(filtro);
+  document.getElementById('painelAgendamentos').appendChild(tabela);
 
   const {
     CREATE_LINK,
@@ -54,16 +54,23 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (!json.ok) throw new Error(json.error || 'Erro ao criar agendamento.');
 
       msg.innerHTML = `
-        <p class="text-emerald-700 font-semibold mt-2">Agendamento criado!</p>
-        <a href="${json.link}" target="_blank" 
-           class="text-blue-600 underline break-all block mt-1">${json.link}</a>
-        <button id="copyBtn" class="mt-3 px-3 py-2 bg-black text-white rounded-lg text-sm hover:bg-gray-800 transition">
-          Copiar Link
-        </button>
-      `;
+  <div id="linkBox" class="p-3 border border-emerald-200 bg-emerald-50 rounded-lg mt-4">
+    <p class="text-emerald-700 font-semibold">Agendamento criado com sucesso!</p>
+    <a href="${json.link}" target="_blank"
+       class="text-blue-600 underline break-all block mt-1">${json.link}</a>
+    <button id="copyBtn" 
+      class="mt-3 px-3 py-2 bg-black text-white rounded-lg text-sm hover:bg-gray-800 transition">
+      Copiar Link
+    </button>
+  </div>
+`;
       document.getElementById('copyBtn').addEventListener('click', () => {
         navigator.clipboard.writeText(json.link);
+        msg.querySelector('#copyBtn').textContent = 'Copiado!';
       });
+
+      // Aguarda 1s antes de atualizar lista, sem apagar o link
+      setTimeout(() => carregarSlots(), 10000);
 
       await carregarSlots();
     } catch (err) {
