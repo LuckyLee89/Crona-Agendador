@@ -2,15 +2,19 @@ document.addEventListener('DOMContentLoaded', async () => {
   const form = document.getElementById('linkForm');
   const msg = document.getElementById('resultado');
 
-  // containers dinâmicos
+  const filtroWrapper = document.createElement('div');
+  filtroWrapper.className = 'w-full flex justify-center mt-6';
+
   const filtro = document.createElement('div');
-  filtro.className = 'flex flex-col md:flex-row gap-3 mt-8';
+  filtro.className = 'flex flex-col md:flex-row gap-3 w-full max-w-md';
+  filtroWrapper.appendChild(filtro);
+
   const tabela = document.createElement('table');
   tabela.className = 'w-full text-sm text-left border mt-4 hidden';
 
   // ✅ coloca tudo dentro do card, na área certa
   const painel = document.getElementById('painelAgendamentos');
-  painel.appendChild(filtro);
+  painel.appendChild(filtroWrapper);
   painel.appendChild(tabela);
 
   const { CREATE_SLOTS, LIST } = window.CronaConfig; // TOGGLE_SLOT é usado mais abaixo
