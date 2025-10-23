@@ -22,6 +22,10 @@
     env.TOGGLE_SLOT ||
     'https://qrtjuypghjbyrbepwvbb.supabase.co/functions/v1/toggle_slot';
 
+  const CREATE_SLOT =
+    env.CREATE_SLOT ||
+    'https://qrtjuypghjbyrbepwvbb.supabase.co/functions/v1/create_slot';
+
   // 🔑 Criação do cliente Supabase
   const { SUPABASE_URL, SUPABASE_KEY } = window.env;
   window.supa = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
@@ -35,6 +39,7 @@
     SUBMIT,
     CREATE_LINK,
     TOGGLE_SLOT,
+    CREATE_SLOT,
     SUPABASE_URL,
     SUPABASE_KEY,
     TABLE_SLOTS: 'slots',

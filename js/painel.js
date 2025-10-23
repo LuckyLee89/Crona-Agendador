@@ -5,17 +5,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   filtro.className = 'flex flex-col md:flex-row gap-3 mt-8';
   const tabela = document.createElement('table');
   tabela.className = 'w-full text-sm text-left border mt-4 hidden';
-  document.getElementById('painelAgendamentos').appendChild(filtro);
+  document.querySelector('.bg-white.rounded-lg').appendChild(filtro);
   document.getElementById('painelAgendamentos').appendChild(tabela);
 
-  const {
-    CREATE_LINK,
-    LIST,
-    SUPABASE_URL,
-    SUPABASE_KEY,
-    TABLE_SLOTS,
-    TOGGLE_SLOT,
-  } = window.CronaConfig;
+  const { CREATE_SLOT, LIST, TOGGLE_SLOT } = window.CronaConfig;
 
   const supa = window.supa;
 
@@ -34,7 +27,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const vagas_totais = parseInt(form.vagas?.value || '1', 10);
 
     try {
-      const resp = await fetch(CREATE_LINK, {
+      const resp = await fetch(CREATE_SLOT, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
