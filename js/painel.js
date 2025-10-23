@@ -80,16 +80,38 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   // ===================== FILTROS =====================
+  // ===================== FILTROS =====================
   filtro.innerHTML = `
-  <input type="date" id="filtroData"
-    class="rounded-xl border-gray-300 px-3 py-2 w-full focus:ring-black focus:border-black" />
-  <input type="text" id="filtroLocal"
-    placeholder="Filtrar por local..."
-    class="rounded-xl border-gray-300 px-3 py-2 w-full focus:ring-black focus:border-black" />
-  <button id="btnFiltrar"
-    class="bg-black text-white rounded-xl px-5 py-2 hover:bg-gray-800 w-full md:w-auto">Filtrar</button>
-  <button id="btnLimpar"
-    class="bg-gray-200 text-gray-800 rounded-xl px-5 py-2 hover:bg-gray-300 w-full md:w-auto">Limpar</button>
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-8">
+    <div class="flex flex-col gap-3">
+      <input
+        type="date"
+        id="filtroData"
+        class="rounded-lg border-gray-300 px-3 py-2 w-full focus:ring-black focus:border-black"
+      />
+      <input
+        type="text"
+        id="filtroLocal"
+        placeholder="Filtrar por local..."
+        class="rounded-lg border-gray-300 px-3 py-2 w-full focus:ring-black focus:border-black"
+      />
+    </div>
+
+    <div class="flex flex-row items-end gap-3 justify-center md:justify-start">
+      <button
+        id="btnFiltrar"
+        class="bg-black text-white rounded-lg px-5 py-2 hover:bg-gray-800 transition w-28"
+      >
+        Filtrar
+      </button>
+      <button
+        id="btnLimpar"
+        class="bg-gray-200 text-gray-800 rounded-lg px-5 py-2 hover:bg-gray-300 transition w-28"
+      >
+        Limpar
+      </button>
+    </div>
+  </div>
 `;
 
   const btnFiltrar = document.getElementById('btnFiltrar');
