@@ -1,20 +1,17 @@
 document.addEventListener('DOMContentLoaded', async () => {
   const form = document.getElementById('linkForm');
   const msg = document.getElementById('resultado');
-
-  const filtroWrapper = document.createElement('div');
-  filtroWrapper.className = 'w-full flex justify-center mt-6';
-
-  const filtro = document.createElement('div');
-  filtro.className = 'flex flex-col md:flex-row gap-3 w-full max-w-md';
-  filtroWrapper.appendChild(filtro);
-
   const tabela = document.createElement('table');
   tabela.className = 'w-full text-sm text-left border mt-4 hidden';
-
-  // ✅ coloca tudo dentro do card, na área certa
   const painel = document.getElementById('painelAgendamentos');
-  painel.appendChild(filtroWrapper);
+  const filtroContainer = document.createElement('div');
+  filtroContainer.className = 'mt-6 w-full';
+
+  const filtro = document.createElement('div');
+  filtro.className =
+    'grid grid-cols-1 md:grid-cols-[1fr,1fr,auto,auto] gap-3 w-full';
+  filtroContainer.appendChild(filtro);
+  painel.appendChild(filtroContainer);
   painel.appendChild(tabela);
 
   const { CREATE_SLOTS, LIST } = window.CronaConfig; // TOGGLE_SLOT é usado mais abaixo
@@ -84,16 +81,16 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // ===================== FILTROS =====================
   filtro.innerHTML = `
-    <input type="date" id="filtroData"
-      class="rounded-lg border-gray-300 px-3 py-2 flex-1 focus:ring-black focus:border-black" />
-    <input type="text" id="filtroLocal"
-      placeholder="Filtrar por local..."
-      class="rounded-lg border-gray-300 px-3 py-2 flex-1 focus:ring-black focus:border-black" />
-    <button id="btnFiltrar"
-      class="bg-black text-white rounded-lg px-4 py-2 hover:bg-gray-800">Filtrar</button>
-    <button id="btnLimpar"
-      class="bg-gray-200 text-gray-800 rounded-lg px-4 py-2 hover:bg-gray-300">Limpar</button>
-  `;
+  <input type="date" id="filtroData"
+    class="rounded-xl border-gray-300 px-3 py-2 w-full focus:ring-black focus:border-black" />
+  <input type="text" id="filtroLocal"
+    placeholder="Filtrar por local..."
+    class="rounded-xl border-gray-300 px-3 py-2 w-full focus:ring-black focus:border-black" />
+  <button id="btnFiltrar"
+    class="bg-black text-white rounded-xl px-5 py-2 hover:bg-gray-800 w-full md:w-auto">Filtrar</button>
+  <button id="btnLimpar"
+    class="bg-gray-200 text-gray-800 rounded-xl px-5 py-2 hover:bg-gray-300 w-full md:w-auto">Limpar</button>
+`;
 
   const btnFiltrar = document.getElementById('btnFiltrar');
   const btnLimpar = document.getElementById('btnLimpar');
