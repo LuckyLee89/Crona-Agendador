@@ -81,32 +81,33 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // ===================== FILTROS =====================
   // ===================== FILTROS =====================
+  // ===================== FILTROS =====================
   filtro.innerHTML = `
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-8">
-    <div class="flex flex-col gap-3">
+  <div class="mt-8 space-y-3">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
       <input
         type="date"
         id="filtroData"
-        class="rounded-lg border-gray-300 px-3 py-2 w-full focus:ring-black focus:border-black"
+        class="rounded-xl border-gray-300 px-3 py-2 w-full focus:ring-black focus:border-black"
       />
       <input
         type="text"
         id="filtroLocal"
         placeholder="Filtrar por local..."
-        class="rounded-lg border-gray-300 px-3 py-2 w-full focus:ring-black focus:border-black"
+        class="rounded-xl border-gray-300 px-3 py-2 w-full focus:ring-black focus:border-black"
       />
     </div>
 
-    <div class="flex flex-row items-end gap-3 justify-center md:justify-start">
+    <div class="flex flex-col md:flex-row gap-3">
       <button
         id="btnFiltrar"
-        class="bg-black text-white rounded-lg px-5 py-2 hover:bg-gray-800 transition w-28"
+        class="w-full md:flex-1 bg-black text-white rounded-xl px-5 py-2 font-medium hover:bg-gray-800 transition"
       >
         Filtrar
       </button>
       <button
         id="btnLimpar"
-        class="bg-gray-200 text-gray-800 rounded-lg px-5 py-2 hover:bg-gray-300 transition w-28"
+        class="w-full md:flex-1 bg-gray-200 text-gray-800 rounded-xl px-5 py-2 font-medium hover:bg-gray-300 transition"
       >
         Limpar
       </button>
