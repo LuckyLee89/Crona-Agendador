@@ -22,9 +22,9 @@
     env.TOGGLE_SLOT ||
     'https://qrtjuypghjbyrbepwvbb.supabase.co/functions/v1/toggle_slot';
 
-  const CREATE_SLOT =
-    env.CREATE_SLOT ||
-    'https://qrtjuypghjbyrbepwvbb.supabase.co/functions/v1/create_slot';
+  const CREATE_SLOTS =
+    env.CREATE_SLOTS ||
+    'https://qrtjuypghjbyrbepwvbb.supabase.co/functions/v1/create_slots';
 
   // 🔑 Criação do cliente Supabase
   const { SUPABASE_URL, SUPABASE_KEY } = window.env;
@@ -39,7 +39,7 @@
     SUBMIT,
     CREATE_LINK,
     TOGGLE_SLOT,
-    CREATE_SLOT,
+    CREATE_SLOTS,
     SUPABASE_URL,
     SUPABASE_KEY,
     TABLE_SLOTS: 'slots',

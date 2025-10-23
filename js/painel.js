@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   painel.appendChild(filtro);
   painel.appendChild(tabela);
 
-  const { CREATE_SLOT, LIST } = window.CronaConfig; // TOGGLE_SLOT é usado mais abaixo
+  const { CREATE_SLOTS, LIST } = window.CronaConfig; // TOGGLE_SLOT é usado mais abaixo
   let intervalId = null;
 
   // ===================== FORM: criar agendamento =====================
@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const vagas_totais = parseInt(form.vagas?.value || '1', 10);
 
     try {
-      const resp = await fetch(CREATE_SLOT, {
+      const resp = await fetch(CREATE_SLOTS, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
