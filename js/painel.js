@@ -4,12 +4,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   const tabela = document.createElement('table');
   tabela.className = 'w-full text-sm text-left border mt-4 hidden';
   const painel = document.getElementById('painelAgendamentos');
+
   const filtroContainer = document.createElement('div');
   filtroContainer.className = 'mt-6 w-full';
 
+  // 🔥 container fluido, sem grid antiga
   const filtro = document.createElement('div');
-  filtro.className =
-    'grid grid-cols-1 md:grid-cols-[1fr,1fr,auto,auto] gap-3 w-full';
+  filtro.className = 'w-full space-y-4';
   filtroContainer.appendChild(filtro);
   painel.appendChild(filtroContainer);
   painel.appendChild(tabela);
@@ -80,34 +81,34 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   // ===================== FILTROS =====================
-  // ===================== FILTROS =====================
-  // ===================== FILTROS =====================
   filtro.innerHTML = `
-  <div class="mt-8 space-y-3">
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+  <div class="w-full mt-8 space-y-4">
+    <!-- Linha dos filtros -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
       <input
         type="date"
         id="filtroData"
-        class="rounded-xl border-gray-300 px-3 py-2 w-full focus:ring-black focus:border-black"
+        class="rounded-xl border-gray-300 px-4 py-2 w-full focus:ring-black focus:border-black"
       />
       <input
         type="text"
         id="filtroLocal"
         placeholder="Filtrar por local..."
-        class="rounded-xl border-gray-300 px-3 py-2 w-full focus:ring-black focus:border-black"
+        class="rounded-xl border-gray-300 px-4 py-2 w-full focus:ring-black focus:border-black"
       />
     </div>
 
-    <div class="flex flex-col md:flex-row gap-3">
+    <!-- Linha dos botões -->
+    <div class="flex gap-3 w-full">
       <button
         id="btnFiltrar"
-        class="w-full md:flex-1 bg-black text-white rounded-xl px-5 py-2 font-medium hover:bg-gray-800 transition"
+        class="flex-1 bg-black text-white font-semibold rounded-xl py-2 hover:bg-gray-800 transition"
       >
         Filtrar
       </button>
       <button
         id="btnLimpar"
-        class="w-full md:flex-1 bg-gray-200 text-gray-800 rounded-xl px-5 py-2 font-medium hover:bg-gray-300 transition"
+        class="flex-1 bg-gray-200 text-gray-800 font-semibold rounded-xl py-2 hover:bg-gray-300 transition"
       >
         Limpar
       </button>

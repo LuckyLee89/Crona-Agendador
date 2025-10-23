@@ -2,33 +2,45 @@
 <html lang="pt-br">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Crona — Agendador</title>
+
+    <!-- Inter -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      html,
+      body,
+      input,
+      select,
+      textarea,
+      button {
+        font-family: 'Inter', sans-serif !important;
+      }
+    </style>
+
+    <!-- Tailwind -->
     <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio,line-clamp"></script>
     <script>
       tailwind.config = {
         theme: {
-          extend: {
-            colors: {
-              emerald: {
-                600: '#059669',
-                700: '#047857',
-              },
-            },
-          },
+          extend: { colors: { emerald: { 600: '#059669', 700: '#047857' } } },
         },
       };
     </script>
   </head>
+
   <body
-    class="bg-emerald-50 text-gray-800 flex items-center justify-center min-h-screen"
+    class="min-h-screen bg-gray-50 text-gray-900 flex items-center justify-center p-6"
   >
-    <main class="text-center space-y-10">
+    <main
+      class="max-w-md w-full bg-white shadow-xl rounded-2xl p-8 text-center space-y-8"
+    >
       <div>
-        <h1 class="text-4xl font-extrabold text-emerald-700">
-          Crona Agendador
-        </h1>
-        <p class="text-gray-600 mt-2">
+        <h1 class="text-3xl font-bold text-gray-900">Crona Agendador</h1>
+        <p class="text-sm text-gray-600 mt-2">
           Sistema simples de agendamento e assinaturas digitais
         </p>
       </div>
@@ -36,21 +48,21 @@
       <div class="space-y-4">
         <a
           href="agendar.html"
-          class="block w-60 mx-auto py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold transition text-center"
+          class="block w-full py-3 rounded-xl bg-black hover:bg-gray-800 text-white font-semibold transition"
         >
           Fazer Agendamento
         </a>
         <a
           href="painel.html"
-          class="block w-60 mx-auto py-3 rounded-xl border border-emerald-500 text-emerald-500 hover:bg-emerald-100 font-semibold transition text-center"
+          class="block w-full py-3 rounded-xl border border-gray-400 text-gray-800 hover:bg-gray-100 font-semibold transition"
         >
           Criar Novo Agendamento
         </a>
       </div>
 
-      <footer class="text-gray-500 text-sm pt-8">
-        © <span id="year"></span> Crona — Desenvolvido por
-        <strong>Lincon Pereira</strong>
+      <footer class="text-gray-500 text-xs pt-6 border-t">
+        © <span id="year"></span> — Crona Agendador<br />
+        <strong>Desenvolvido por Lincon Pereira</strong>
       </footer>
     </main>
 
