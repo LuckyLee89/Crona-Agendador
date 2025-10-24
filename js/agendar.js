@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const forcedLocal = params.get('local');
   const forcedNome = params.get('nome');
   const forcedSlot = params.get('slot');
+
   const { LIST, LOOKUP } = window.CronaConfig;
 
   // 🔹 1. Carrega as datas disponíveis via função list_slots
@@ -56,41 +57,49 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  // Se veio com ?data=XYZ na URL → usa fixo
-  if (!forcedDate) await loadDatas();
-  else {
-    if (forcedSlot) {
-      try {
-        const res = await fetch(`${LIST}?slot=${forcedSlot}`);
-        const json = await res.json();
+  // 🔹 2. Define comportamento conforme parâmetros na URL
+  if (forcedSlot) {
+    try {
+      const res = await fetch(`${LIST}?slot=${forcedSlot}`);
+      const json = await res.json();
 
-        if (json.ok && json.slot) {
-          const opt = document.createElement('option');
-          opt.value = json.slot.data;
-          opt.textContent = `${json.slot.data} — ${json.slot.local}`;
-          opt.selected = true;
-          dataEl.appendChild(opt);
-          dataEl.disabled = true;
-        } else {
-          await loadDatas();
-        }
-      } catch (err) {
-        console.error('Erro ao carregar slot forçado:', err);
+      if (json.ok && json.slots?.length > 0) {
+        const s = json.slots[0];
+        dataEl.innerHTML = `
+    <option value="${s.data}" selected>
+      ${s.data} — ${s.local} (${s.vagas_restantes || s.vagas_totais})
+    </option>`;
+        dataEl.disabled = true;
+
+        // 🧠 Salva o local (e horários, se quiser) em sessionStorage para o termo
+        sessionStorage.setItem(
+          'slotInfo',
+          JSON.stringify({
+            data: s.data,
+            local: s.local,
+            horario_inicio: s.horario_inicio,
+            horario_fim: s.horario_fim,
+          }),
+        );
+      } else {
         await loadDatas();
       }
-    } else if (!forcedDate) {
+    } catch (err) {
+      console.error('Erro ao carregar slot forçado:', err);
       await loadDatas();
-    } else {
-      const opt = document.createElement('option');
-      opt.value = forcedDate;
-      opt.textContent = forcedDate;
-      opt.selected = true;
-      dataEl.appendChild(opt);
-      dataEl.disabled = true;
     }
+  } else if (forcedDate) {
+    const opt = document.createElement('option');
+    opt.value = forcedDate;
+    opt.textContent = forcedDate;
+    opt.selected = true;
+    dataEl.appendChild(opt);
+    dataEl.disabled = true;
+  } else {
+    await loadDatas();
   }
 
-  // 🔹 2. Clique do botão "Continuar"
+  // 🔹 3. Clique do botão "Continuar"
   btn.addEventListener('click', async () => {
     const cpfDigits = cpfEl.value.replace(/\D/g, '');
     const slot_data = dataEl.value.trim();
@@ -126,14 +135,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
       }
 
-      // Se já cadastrado mas não assinou, ou for novo → vai pro termo
+      const slotInfo = JSON.parse(sessionStorage.getItem('slotInfo') || '{}');
+
       const prefill = {
         cpf: cpfDigits,
         nome: forcedNome || '',
-        slot_data,
-        slot_local,
+        slot_data: slotInfo.data || slot_data,
+        slot_local: slotInfo.local || forcedLocal || '',
+        horario_inicio: slotInfo.horario_inicio || '',
+        horario_fim: slotInfo.horario_fim || '',
         _ts: Date.now(),
       };
+
       sessionStorage.setItem('prefill', JSON.stringify(prefill));
       window.location.href = 'termo.html';
     } catch (e) {
