@@ -52,6 +52,22 @@ document.addEventListener('DOMContentLoaded', async () => {
       const json = await resp.json();
       if (!json.ok) throw new Error(json.error || 'Erro ao criar agendamento.');
 
+      // 🔗 Cria o link no banco (nova função)
+      try {
+        const respLink = await fetch(window.CronaConfig.CREATE_LINK, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ slot_id: json.id }),
+        });
+        const linkJson = await respLink.json();
+        if (!linkJson.ok)
+          throw new Error(linkJson.error || 'Erro ao criar link.');
+        json.link = linkJson.link; // substitui o link antigo pelo do banco
+        console.log('✅ Link salvo e retornado:', linkJson.link);
+      } catch (linkErr) {
+        console.warn('⚠️ Erro ao criar link no banco:', linkErr);
+      }
+
       // ✅ mostra o link pra copiar
       msg.innerHTML = `
         <div id="linkBox" class="p-3 border border-emerald-200 bg-emerald-50 rounded-lg mt-4">
