@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Crona — Painel do Criador</title>
+
+    <!-- Inter -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      html,
+      body,
+      input,
+      select,
+      textarea,
+      button {
+        font-family: 'Inter', sans-serif !important;
+      }
+    </style>
+
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio,line-clamp"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: { emerald: { 600: '#059669', 700: '#047857' } },
+          },
+        },
+      };
+    </script>
+  </head>
+
+  <body
+    class="min-h-screen bg-gray-50 text-gray-900 flex items-center justify-center p-6"
+  >
+    <main
+      class="max-w-md w-full bg-white shadow-xl rounded-2xl p-8 text-center space-y-8"
+    >
+      <div>
+        <h1 class="text-3xl font-bold text-gray-900">Painel Crona</h1>
+        <p class="text-sm text-gray-600 mt-2">
+          Acesse com sua conta de criador para gerenciar seus agendamentos.
+        </p>
+      </div>
+
+      <form id="loginForm" class="space-y-4 text-left">
+        <input
+          type="email"
+          id="email"
+          placeholder="E-mail"
+          required
+          class="w-full rounded-xl border-gray-300 px-4 py-2 focus:ring-black focus:border-black"
+        />
+        <input
+          type="password"
+          id="password"
+          placeholder="Senha"
+          required
+          class="w-full rounded-xl border-gray-300 px-4 py-2 focus:ring-black focus:border-black"
+        />
+        <button
+          type="submit"
+          class="w-full bg-black text-white rounded-xl py-3 hover:bg-gray-800 transition"
+        >
+          Entrar
+        </button>
+      </form>
+
+      <p id="msg" class="text-sm text-gray-600 mt-2"></p>
+
+      <a
+        href="index.html"
+        class="text-xs text-gray-500 hover:underline block mt-4"
+        >← Voltar ao início</a
+      >
+
+      <footer class="text-gray-500 text-xs pt-6 border-t">
+        © <span id="year"></span> — Crona Agendador<br />
+        <strong>Desenvolvido por Lincon Pereira</strong>
+      </footer>
+    </main>
+
+    <script src="js/env.js"></script>
+    <script src="js/config.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.1/dist/umd/supabase.min.js"></script>
+
+    <script>
+      document.getElementById('year').textContent = new Date().getFullYear();
+
+      const supabase = window.supabase.createClient(
+        window.env.SUPABASE_URL,
+        window.env.SUPABASE_KEY,
+      );
+
+      const form = document.getElementById('loginForm');
+      const msg = document.getElementById('msg');
+
+      form.addEventListener('submit', async e => {
+        e.preventDefault();
+        msg.textContent = 'Entrando...';
+
+        const email = form.email.value.trim();
+        const password = form.password.value.trim();
+
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+
+        if (error) {
+          msg.textContent = 'Erro: ' + error.message;
+          msg.className = 'text-sm text-rose-600 mt-2';
+          return;
+        }
+
+        // Armazena sessão localmente
+        localStorage.setItem('supabase_session', JSON.stringify(data.session));
+
+        // Redireciona para o painel do criador
+        window.location.href = 'painel.html';
+      });
+    </script>
+  </body>
+</html>

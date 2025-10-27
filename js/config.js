@@ -10,6 +10,10 @@
     env.LIST ||
     'https://qrtjuypghjbyrbepwvbb.supabase.co/functions/v1/list_slots';
 
+  const LIST_PUBLIC =
+    env.LIST_PUBLIC ||
+    'https://qrtjuypghjbyrbepwvbb.supabase.co/functions/v1/list_slots_publico';
+
   const SUBMIT =
     env.SUBMIT ||
     'https://qrtjuypghjbyrbepwvbb.supabase.co/functions/v1/submit_consent';
@@ -36,6 +40,7 @@
   window.CronaConfig = Object.freeze({
     LOOKUP,
     LIST,
+    LIST_PUBLIC,
     SUBMIT,
     CREATE_LINK,
     TOGGLE_SLOT,

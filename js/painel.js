@@ -1,24 +1,60 @@
 document.addEventListener('DOMContentLoaded', async () => {
-  const form = document.getElementById('linkForm');
+  const supabase = window.supabase.createClient(
+    window.env.SUPABASE_URL,
+    window.env.SUPABASE_KEY,
+  );
+
+  // 🔐 Recupera sessão atual
+  let {
+    data: { session },
+  } = await supabase.auth.getSession();
+
+  // Caso não exista sessão no cache, tenta recuperar do Supabase
+  if (!session) {
+    const { data: fresh } = await supabase.auth.refreshSession();
+    session = fresh?.session || null;
+  }
+
+  if (!session) {
+    console.warn('⚠️ Nenhuma sessão encontrada — redirecionando para login.');
+    localStorage.clear();
+    window.location.href = 'login_criador.html';
+    return;
+  }
+
+  const token = session.access_token;
+  const userEmail = session.user.email;
+
   const msg = document.getElementById('resultado');
+  const form = document.getElementById('linkForm');
   const tabela = document.createElement('table');
   tabela.className = 'w-full text-sm text-left border mt-4 hidden';
   const painel = document.getElementById('painelAgendamentos');
 
   const filtroContainer = document.createElement('div');
   filtroContainer.className = 'mt-6 w-full';
-
-  // 🔥 container fluido, sem grid antiga
   const filtro = document.createElement('div');
   filtro.className = 'w-full space-y-4';
   filtroContainer.appendChild(filtro);
   painel.appendChild(filtroContainer);
   painel.appendChild(tabela);
 
-  const { CREATE_SLOTS, LIST } = window.CronaConfig; // TOGGLE_SLOT é usado mais abaixo
+  const { CREATE_SLOTS, LIST, TOGGLE_SLOT } = window.CronaConfig;
   let intervalId = null;
 
-  // ===================== FORM: criar agendamento =====================
+  // ===================== LOGOUT =====================
+  const btnSair = document.getElementById('btnSair');
+  if (btnSair) {
+    btnSair.addEventListener('click', async () => {
+      btnSair.disabled = true;
+      btnSair.textContent = 'Saindo...';
+      await supabase.auth.signOut();
+      localStorage.clear();
+      window.location.href = 'index.html';
+    });
+  }
+
+  // ===================== FORM =====================
   form.addEventListener('submit', async e => {
     e.preventDefault();
     msg.textContent = 'Criando agendamento...';
@@ -35,10 +71,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          // estes headers não são necessários para Edge Function pública,
-          // mas não atrapalham; pode remover se preferir.
-          Authorization: `Bearer ${window.CronaConfig.SUPABASE_KEY}`,
-          apikey: window.CronaConfig.SUPABASE_KEY,
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           data,
@@ -46,29 +79,13 @@ document.addEventListener('DOMContentLoaded', async () => {
           horario_inicio,
           horario_fim,
           vagas_totais,
+          email_criador: userEmail,
         }),
       });
 
       const json = await resp.json();
       if (!json.ok) throw new Error(json.error || 'Erro ao criar agendamento.');
 
-      // 🔗 Cria o link no banco (nova função)
-      try {
-        const respLink = await fetch(window.CronaConfig.CREATE_LINK, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ slot_id: json.id }),
-        });
-        const linkJson = await respLink.json();
-        if (!linkJson.ok)
-          throw new Error(linkJson.error || 'Erro ao criar link.');
-        json.link = linkJson.link; // substitui o link antigo pelo do banco
-        console.log('✅ Link salvo e retornado:', linkJson.link);
-      } catch (linkErr) {
-        console.warn('⚠️ Erro ao criar link no banco:', linkErr);
-      }
-
-      // ✅ mostra o link pra copiar
       msg.innerHTML = `
         <div id="linkBox" class="p-3 border border-emerald-200 bg-emerald-50 rounded-lg mt-4">
           <p class="text-emerald-700 font-semibold">Agendamento criado com sucesso!</p>
@@ -85,9 +102,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         msg.querySelector('#copyBtn').textContent = 'Copiado!';
       });
 
-      // atualiza a lista:
       await carregarSlots();
-      // e mantém auto-refresh
       if (!intervalId) iniciarAutoRefresh(15000);
     } catch (err) {
       console.error(err);
@@ -98,45 +113,30 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // ===================== FILTROS =====================
   filtro.innerHTML = `
-  <div class="w-full mt-8 space-y-4">
-    <!-- Linha dos filtros -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
-      <input
-        type="date"
-        id="filtroData"
-        class="rounded-xl border-gray-300 px-4 py-2 w-full focus:ring-black focus:border-black"
-      />
-      <input
-        type="text"
-        id="filtroLocal"
-        placeholder="Filtrar por local..."
-        class="rounded-xl border-gray-300 px-4 py-2 w-full focus:ring-black focus:border-black"
-      />
+    <div class="w-full mt-8 space-y-4">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
+        <input type="date" id="filtroData"
+          class="rounded-xl border-gray-300 px-4 py-2 w-full focus:ring-black focus:border-black" />
+        <input type="text" id="filtroLocal" placeholder="Filtrar por local..."
+          class="rounded-xl border-gray-300 px-4 py-2 w-full focus:ring-black focus:border-black" />
+      </div>
+      <div class="flex gap-3 w-full">
+        <button id="btnFiltrar"
+          class="flex-1 bg-black text-white font-semibold rounded-xl py-2 hover:bg-gray-800 transition">
+          Filtrar
+        </button>
+        <button id="btnLimpar"
+          class="flex-1 bg-gray-200 text-gray-800 font-semibold rounded-xl py-2 hover:bg-gray-300 transition">
+          Limpar
+        </button>
+      </div>
     </div>
-
-    <!-- Linha dos botões -->
-    <div class="flex gap-3 w-full">
-      <button
-        id="btnFiltrar"
-        class="flex-1 bg-black text-white font-semibold rounded-xl py-2 hover:bg-gray-800 transition"
-      >
-        Filtrar
-      </button>
-      <button
-        id="btnLimpar"
-        class="flex-1 bg-gray-200 text-gray-800 font-semibold rounded-xl py-2 hover:bg-gray-300 transition"
-      >
-        Limpar
-      </button>
-    </div>
-  </div>
-`;
+  `;
 
   const btnFiltrar = document.getElementById('btnFiltrar');
   const btnLimpar = document.getElementById('btnLimpar');
   const filtroData = document.getElementById('filtroData');
   const filtroLocal = document.getElementById('filtroLocal');
-
   btnFiltrar.addEventListener('click', carregarSlots);
   btnLimpar.addEventListener('click', () => {
     filtroData.value = '';
@@ -152,13 +152,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     try {
-      const resp = await fetch(LIST);
+      const resp = await fetch(LIST, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
       const data = await resp.json();
       if (!data.ok) throw new Error('Erro ao listar agendamentos.');
 
-      let slots = data.slots || []; // list_slots retorna { ok, slots } :contentReference[oaicite:1]{index=1}
-
-      // filtros locais
+      let slots = data.slots || [];
       if (filtroData.value)
         slots = slots.filter(s => s.data === filtroData.value);
       if (filtroLocal.value)
@@ -175,7 +178,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       msg.textContent = '';
       tabela.classList.remove('hidden');
-
       tabela.innerHTML = `
         <thead class="bg-gray-100 text-gray-800">
           <tr>
@@ -199,36 +201,28 @@ document.addEventListener('DOMContentLoaded', async () => {
               }</td>
               <td class="px-3 py-2 border font-semibold ${
                 s.vagas_restantes === 0 ? 'text-rose-600' : 'text-emerald-700'
-              }">
-                ${s.vagas_restantes}/${s.vagas_totais}
-              </td>
+              }">${s.vagas_restantes}/${s.vagas_totais}</td>
               <td class="px-3 py-2 border">
                 <span class="px-2 py-1 text-xs rounded-full ${
                   s.ativo
                     ? 'bg-emerald-100 text-emerald-700'
                     : 'bg-gray-200 text-gray-600'
-                }">
-                  ${s.ativo ? 'Ativo' : 'Inativo'}
-                </span>
+                }">${s.ativo ? 'Ativo' : 'Inativo'}</span>
               </td>
               <td class="px-3 py-2 border flex flex-wrap gap-2">
-                <a href="${
-                  s.link
-                }" target="_blank" class="text-blue-600 underline text-sm">Abrir</a>
-                <button class="text-sm text-red-600 hover:underline" data-id="${
-                  s.id
-                }" data-active="${s.ativo}">
+                <a href="${s.link}" target="_blank"
+                   class="text-blue-600 underline text-sm">Abrir</a>
+                <button class="text-sm text-red-600 hover:underline"
+                  data-id="${s.id}" data-active="${s.ativo}">
                   ${s.ativo ? 'Desativar' : 'Ativar'}
                 </button>
               </td>
-            </tr>
-          `,
+            </tr>`,
             )
             .join('')}
         </tbody>
       `;
 
-      // ações
       tabela
         .querySelectorAll('button[data-id]')
         .forEach(btn => btn.addEventListener('click', toggleStatus));
@@ -239,7 +233,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  // ===================== TOGGLE STATUS =====================
   async function toggleStatus(e) {
     const id = e.target.dataset.id;
     const ativo = e.target.dataset.active === 'true';
@@ -249,12 +242,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     msg.className = 'text-sm text-gray-600 mt-2';
 
     try {
-      const resp = await fetch(window.CronaConfig.TOGGLE_SLOT, {
+      const resp = await fetch(TOGGLE_SLOT, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({ id, ativo: novoStatus }),
       });
-
       const json = await resp.json();
       if (!json.ok) throw new Error(json.error || 'Erro ao alterar status.');
 
@@ -270,7 +265,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  // ===================== AUTO REFRESH =====================
   function iniciarAutoRefresh(intervalo = 15000) {
     if (intervalId) clearInterval(intervalId);
     intervalId = setInterval(() => {
@@ -279,7 +273,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }, intervalo);
   }
 
-  // inicialização
   await carregarSlots();
   iniciarAutoRefresh(15000);
 });

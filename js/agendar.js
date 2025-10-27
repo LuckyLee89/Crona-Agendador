@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const forcedNome = params.get('nome');
   const forcedSlot = params.get('slot');
 
-  const { LIST, LOOKUP } = window.CronaConfig;
+  const { LIST_PUBLIC, LOOKUP } = window.CronaConfig;
 
   // 🔹 1. Carrega as datas disponíveis via função list_slots
   async function loadDatas(cpf) {
@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     dataEl.innerHTML = '<option value="">Carregando datas...</option>';
 
     try {
-      const res = await fetch(cpf ? `${LIST}?cpf=${cpf}` : LIST);
+      const res = await fetch(cpf ? `${LIST_PUBLIC}?cpf=${cpf}` : LIST_PUBLIC);
       const json = await res.json();
 
       if (!json.ok || !json.slots?.length) {
@@ -60,7 +60,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // 🔹 2. Define comportamento conforme parâmetros na URL
   if (forcedSlot) {
     try {
-      const res = await fetch(`${LIST}?slot=${forcedSlot}`);
+      const res = await fetch(`${LIST_PUBLIC}?slot=${forcedSlot}`);
       const json = await res.json();
 
       if (json.ok && json.slots?.length > 0) {

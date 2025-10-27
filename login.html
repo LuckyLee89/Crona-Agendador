@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Login — Crona Admin</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+
+  <body
+    class="flex items-center justify-center h-screen bg-gray-50 text-gray-800"
+  >
+    <main class="bg-white shadow-lg rounded-2xl p-8 w-full max-w-sm">
+      <h1 class="text-2xl font-bold text-center mb-4">Painel Crona</h1>
+      <p class="text-center text-sm text-gray-500 mb-6">
+        Acesse com sua conta de administrador
+      </p>
+
+      <form id="loginForm" class="space-y-4">
+        <input
+          type="email"
+          id="email"
+          placeholder="E-mail"
+          required
+          class="w-full border rounded-xl px-4 py-2"
+        />
+        <input
+          type="password"
+          id="password"
+          placeholder="Senha"
+          required
+          class="w-full border rounded-xl px-4 py-2"
+        />
+        <button
+          type="submit"
+          class="w-full bg-black text-white font-semibold rounded-xl py-2 hover:bg-gray-800 transition"
+        >
+          Entrar
+        </button>
+      </form>
+
+      <p id="msg" class="text-center text-sm mt-4 text-gray-600"></p>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/env.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/login.js"></script>
+  </body>
+</html>

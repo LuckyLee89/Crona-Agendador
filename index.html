@@ -4,8 +4,6 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Crona — Agendador</title>
-
-    <!-- Inter -->
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
       rel="stylesheet"
@@ -20,8 +18,6 @@
         font-family: 'Inter', sans-serif !important;
       }
     </style>
-
-    <!-- Tailwind -->
     <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio,line-clamp"></script>
     <script>
       tailwind.config = {
@@ -36,7 +32,8 @@
     class="min-h-screen bg-gray-50 text-gray-900 flex items-center justify-center p-6"
   >
     <main
-      class="max-w-md w-full bg-white shadow-xl rounded-2xl p-8 text-center space-y-8"
+      id="conteudoIndex"
+      class="hidden max-w-md w-full bg-white shadow-xl rounded-2xl p-8 text-center space-y-8"
     >
       <div>
         <h1 class="text-3xl font-bold text-gray-900">Crona Agendador</h1>
@@ -58,6 +55,12 @@
         >
           Criar Novo Agendamento
         </a>
+        <a
+          href="login.html"
+          class="block w-full py-3 rounded-xl border border-gray-400 text-gray-800 hover:bg-gray-100 font-semibold transition"
+        >
+          Entrar como Administrador
+        </a>
       </div>
 
       <footer class="text-gray-500 text-xs pt-6 border-t">
@@ -66,8 +69,35 @@
       </footer>
     </main>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.1/dist/umd/supabase.min.js"></script>
+    <script src="js/env.js"></script>
     <script>
-      document.getElementById('year').textContent = new Date().getFullYear();
+      document.addEventListener('DOMContentLoaded', async () => {
+        document.getElementById('year').textContent = new Date().getFullYear();
+        const supabase = window.supabase.createClient(
+          window.env.SUPABASE_URL,
+          window.env.SUPABASE_KEY,
+        );
+
+        // Se veio do painel com o parâmetro ?from=painel, não redireciona
+        const params = new URLSearchParams(window.location.search);
+        const fromPanel = params.get('from') === 'painel';
+
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+        // Se existe sessão e NÃO veio de ?from=painel → redireciona automaticamente
+        if (session && !fromPanel) {
+          if (session.user.email.endsWith('@admin.com')) {
+            window.location.href = 'painel_admin.html';
+          } else {
+            window.location.href = 'painel.html';
+          }
+        } else {
+          // Caso contrário, mostra normalmente o conteúdo
+          document.getElementById('conteudoIndex').classList.remove('hidden');
+        }
+      });
     </script>
   </body>
 </html>
