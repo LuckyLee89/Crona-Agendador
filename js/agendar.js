@@ -137,15 +137,35 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       const slotInfo = JSON.parse(sessionStorage.getItem('slotInfo') || '{}');
 
-      const prefill = {
+      // ✅ Novo trecho — agora guarda tudo o que veio do Supabase
+      let prefill = {
         cpf: cpfDigits,
-        nome: forcedNome || '',
         slot_data: slotInfo.data || slot_data,
         slot_local: slotInfo.local || forcedLocal || '',
         horario_inicio: slotInfo.horario_inicio || '',
         horario_fim: slotInfo.horario_fim || '',
         _ts: Date.now(),
       };
+
+      // Se o CPF já existir no sistema (SIGNED_PREVIOUSLY ou REGISTERED_NOT_SIGNED)
+      if (result.data) {
+        prefill = {
+          ...prefill,
+          nome: result.data.nome || '',
+          rg: result.data.rg || '',
+          email: result.data.email || '',
+          telefone: result.data.telefone || '',
+          emergencia_nome: result.data.emergencia_nome || '',
+          emergencia_telefone: result.data.emergencia_telefone || '',
+          condicoes_saude: result.data.condicoes_saude || '',
+          medicamentos: result.data.medicamentos || '',
+          alergias: result.data.alergias || '',
+        };
+      }
+
+      // Salva tudo no sessionStorage para ser usado em termo.html
+      sessionStorage.setItem('prefill', JSON.stringify(prefill));
+      window.location.href = 'termo.html';
 
       sessionStorage.setItem('prefill', JSON.stringify(prefill));
       window.location.href = 'termo.html';
