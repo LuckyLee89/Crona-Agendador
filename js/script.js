@@ -192,19 +192,30 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       if (result.status === 'SIGNED_PREVIOUSLY' && result.data) {
         const p = result.data;
-        document.querySelector('[name="nome"]').value = p.nome || '';
-        document.querySelector('[name="rg"]').value = p.rg || '';
-        document.querySelector('[name="email"]').value = p.email || '';
-        document.querySelector('[name="telefone"]').value = p.telefone || '';
-        document.querySelector('[name="emergencia_nome"]').value =
-          p.emergencia_nome || '';
-        document.querySelector('[name="emergencia_telefone"]').value =
-          p.emergencia_telefone || '';
-        document.querySelector('[name="condicoes_saude"]').value =
-          p.condicoes_saude || '';
-        document.querySelector('[name="medicamentos"]').value =
-          p.medicamentos || '';
-        document.querySelector('[name="alergias"]').value = p.alergias || '';
+        console.log('📋 Dados recebidos do Supabase:', p);
+
+        const campos = [
+          'nome',
+          'rg',
+          'email',
+          'telefone',
+          'emergencia_nome',
+          'emergencia_telefone',
+          'condicoes_saude',
+          'medicamentos',
+          'alergias',
+          'observacoes',
+          'preferencias',
+          'outras_informacoes',
+        ];
+
+        campos.forEach(campo => {
+          const el = document.querySelector(`[name="${campo}"]`);
+          if (el && p[campo] !== undefined && p[campo] !== null) {
+            el.value = p[campo];
+          }
+        });
+
         setStatus(
           'Dados carregados automaticamente do último termo assinado.',
           true,
