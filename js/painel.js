@@ -4,12 +4,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.env.SUPABASE_KEY,
   );
 
-  // 🔐 Recupera sessão atual
   let {
     data: { session },
   } = await supabase.auth.getSession();
 
-  // Caso não exista sessão no cache, tenta recuperar do Supabase
   if (!session) {
     const { data: fresh } = await supabase.auth.refreshSession();
     session = fresh?.session || null;
@@ -39,7 +37,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   painel.appendChild(filtroContainer);
   painel.appendChild(tabela);
 
-  const { CREATE_SLOTS, LIST, TOGGLE_SLOT } = window.CronaConfig;
+  const { CREATE_SLOTS, LIST, TOGGLE_SLOT, CREATE_LINK } = window.CronaConfig;
   let intervalId = null;
 
   // ===================== LOGOUT =====================
@@ -86,21 +84,20 @@ document.addEventListener('DOMContentLoaded', async () => {
       const json = await resp.json();
       if (!json.ok) throw new Error(json.error || 'Erro ao criar agendamento.');
 
-      msg.innerHTML = `
-        <div id="linkBox" class="p-3 border border-emerald-200 bg-emerald-50 rounded-lg mt-4">
-          <p class="text-emerald-700 font-semibold">Agendamento criado com sucesso!</p>
-          <a href="${json.link}" target="_blank"
-             class="text-blue-600 underline break-all block mt-1">${json.link}</a>
-          <button id="copyBtn"
-            class="mt-3 px-3 py-2 bg-black text-white rounded-lg text-sm hover:bg-gray-800 transition">
-            Copiar Link
-          </button>
-        </div>
-      `;
-      document.getElementById('copyBtn').addEventListener('click', () => {
-        navigator.clipboard.writeText(json.link);
-        msg.querySelector('#copyBtn').textContent = 'Copiado!';
+      // 🔗 Gera o link após criar o slot
+      const slotId = json.id;
+      const linkResp = await fetch(CREATE_LINK, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ slot_id: slotId }),
       });
+      const linkJson = await linkResp.json();
+
+      if (!linkJson.ok)
+        throw new Error(linkJson.error || 'Erro ao gerar link.');
+
+      msg.textContent = 'Agendamento criado com sucesso!';
+      msg.className = 'text-sm text-emerald-700 mt-2';
 
       await carregarSlots();
       if (!intervalId) iniciarAutoRefresh(15000);
@@ -210,8 +207,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }">${s.ativo ? 'Ativo' : 'Inativo'}</span>
               </td>
               <td class="px-3 py-2 border flex flex-wrap gap-2">
-                <a href="${s.link}" target="_blank"
-                   class="text-blue-600 underline text-sm">Abrir</a>
+                ${
+                  s.link
+                    ? `
+                      <a href="${s.link}" target="_blank"
+                        class="text-blue-600 underline text-sm">Abrir</a>
+                      <button class="text-sm text-gray-600 hover:text-black copyLink"
+                        data-link="${s.link}">Copiar</button>
+                    `
+                    : '<span class="text-gray-400 italic text-sm">Sem link</span>'
+                }
                 <button class="text-sm text-red-600 hover:underline"
                   data-id="${s.id}" data-active="${s.ativo}">
                   ${s.ativo ? 'Desativar' : 'Ativar'}
@@ -226,6 +231,15 @@ document.addEventListener('DOMContentLoaded', async () => {
       tabela
         .querySelectorAll('button[data-id]')
         .forEach(btn => btn.addEventListener('click', toggleStatus));
+
+      // Copiar link
+      tabela.querySelectorAll('.copyLink').forEach(btn => {
+        btn.addEventListener('click', () => {
+          navigator.clipboard.writeText(btn.dataset.link);
+          btn.textContent = 'Copiado!';
+          setTimeout(() => (btn.textContent = 'Copiar'), 2000);
+        });
+      });
     } catch (err) {
       console.error('❌', err);
       msg.textContent = 'Erro ao listar agendamentos.';

@@ -164,11 +164,92 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  // ===================== AUTOPREENCHIMENTO POR CPF =====================
+  cpfInput.addEventListener('blur', async () => {
+    const cpf = cpfMask.unmaskedValue;
+    const slotData = document.querySelector('[name="slot_data"]').value;
+    if (!cpf || cpf.length !== 11 || !slotData) return;
+
+    setStatus('Buscando dados do participante...');
+
+    try {
+      const resp = await fetch(
+        'https://qrtjuypghjbyrbepwvbb.functions.supabase.co/functions/v1/lookup_cpf',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ cpf, slot_data: slotData }),
+        },
+      );
+
+      const result = await resp.json();
+      console.log('🔍 lookup_cpf:', result);
+
+      if (result.status === 'SIGNED_FOR_DATE') {
+        setStatus('Este CPF já assinou o termo para esta data.', false);
+        document.getElementById('submitBtn').disabled = true;
+        return;
+      }
+      if (result.status === 'SIGNED_PREVIOUSLY' && result.data) {
+        const p = result.data;
+        document.querySelector('[name="nome"]').value = p.nome || '';
+        document.querySelector('[name="rg"]').value = p.rg || '';
+        document.querySelector('[name="email"]').value = p.email || '';
+        document.querySelector('[name="telefone"]').value = p.telefone || '';
+        document.querySelector('[name="emergencia_nome"]').value =
+          p.emergencia_nome || '';
+        document.querySelector('[name="emergencia_telefone"]').value =
+          p.emergencia_telefone || '';
+        document.querySelector('[name="condicoes_saude"]').value =
+          p.condicoes_saude || '';
+        document.querySelector('[name="medicamentos"]').value =
+          p.medicamentos || '';
+        document.querySelector('[name="alergias"]').value = p.alergias || '';
+        setStatus(
+          'Dados carregados automaticamente do último termo assinado.',
+          true,
+        );
+        return;
+      }
+
+      if (result.status === 'REGISTERED_NOT_SIGNED' && result.data) {
+        const p = result.data;
+        document.querySelector('[name="nome"]').value = p.nome || '';
+        document.querySelector('[name="rg"]').value = p.rg || '';
+        document.querySelector('[name="email"]').value = p.email || '';
+        document.querySelector('[name="telefone"]').value = p.telefone || '';
+        document.querySelector('[name="emergencia_nome"]').value =
+          p.emergencia_nome || '';
+        document.querySelector('[name="emergencia_telefone"]').value =
+          p.emergencia_telefone || '';
+        document.querySelector('[name="condicoes_saude"]').value =
+          p.condicoes_saude || '';
+        document.querySelector('[name="medicamentos"]').value =
+          p.medicamentos || '';
+        document.querySelector('[name="alergias"]').value = p.alergias || '';
+        setStatus('Dados carregados automaticamente.', true);
+      } else {
+        setStatus('CPF não encontrado. Preencha os dados normalmente.', false);
+      }
+    } catch (err) {
+      console.error('Erro lookup_cpf:', err);
+      setStatus('Erro ao buscar CPF.', false);
+    }
+  });
+
   // submit
   const { SUBMIT } = window.CronaConfig;
 
   form.addEventListener('submit', async e => {
     e.preventDefault();
+    const localInput = form.querySelector('[name="slot_local"]');
+    if (!localInput.value.trim()) {
+      return setStatus(
+        'Informe o local do agendamento antes de enviar.',
+        false,
+      );
+    }
+
     if (!hasSignature) return setStatus('Assine antes de enviar.', false);
     btn.disabled = true;
     setStatus('Enviando...');

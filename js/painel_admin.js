@@ -9,7 +9,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.env.SUPABASE_KEY,
   );
 
-  // 🔐 Recupera a sessão armazenada
   const session = JSON.parse(localStorage.getItem('adminSession'));
   if (!session) {
     window.location.href = 'login.html';
@@ -27,6 +26,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       window.location.href = 'index.html';
     });
   }
+
   async function carregarSlots(filtros = {}) {
     msg.textContent = 'Carregando agendamentos...';
 
@@ -55,7 +55,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       return;
     }
 
-    // Monta a tabela
     painel.innerHTML = `
       <table class="w-full border border-gray-200 rounded-xl text-sm">
         <thead class="bg-gray-100">
@@ -90,7 +89,17 @@ document.addEventListener('DOMContentLoaded', async () => {
                   ${slot.ativo ? 'Ativo' : 'Inativo'}
                 </span>
               </td>
-              <td class="px-3 py-2 text-center">
+              <td class="px-3 py-2 text-center flex justify-center gap-2 flex-wrap">
+                ${
+                  slot.link
+                    ? `
+                      <a href="${slot.link}" target="_blank"
+                        class="text-blue-600 underline text-sm">Abrir</a>
+                      <button class="text-sm text-gray-600 hover:text-black copyLink"
+                        data-link="${slot.link}">Copiar</button>
+                    `
+                    : '<span class="text-gray-400 italic text-sm">Sem link</span>'
+                }
                 <button
                   data-id="${slot.id}"
                   class="toggleAtivo text-sm text-blue-600 hover:underline"
@@ -106,19 +115,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     `;
     msg.textContent = '';
 
-    // Ativa botões de ativar/desativar
     document.querySelectorAll('.toggleAtivo').forEach(btn =>
       btn.addEventListener('click', async e => {
         const id = e.target.dataset.id;
         const slot = data.find(s => String(s.id) === String(id));
-
         if (!slot) {
           alert('Erro: agendamento não encontrado.');
           return;
         }
-
         const novoStatus = !slot.ativo;
-
         try {
           const resp = await fetch(
             'https://qrtjuypghjbyrbepwvbb.functions.supabase.co/functions/v1/toggle_slot',
@@ -128,9 +133,7 @@ document.addEventListener('DOMContentLoaded', async () => {
               body: JSON.stringify({ id: slot.id, ativo: novoStatus }),
             },
           );
-
           const result = await resp.json();
-
           if (!result.ok) {
             console.error(result.error);
             alert('Erro ao atualizar status.');
@@ -148,6 +151,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
       }),
     );
+
+    // Copiar link
+    document.querySelectorAll('.copyLink').forEach(btn => {
+      btn.addEventListener('click', () => {
+        navigator.clipboard.writeText(btn.dataset.link);
+        btn.textContent = 'Copiado!';
+        setTimeout(() => (btn.textContent = 'Copiar'), 2000);
+      });
+    });
   }
 
   btnFiltrar.addEventListener('click', () => {
