@@ -1,3 +1,5 @@
+import { log, warn, error } from './loggerHelper.js';
+
 document.addEventListener('DOMContentLoaded', async () => {
   const cpfEl = document.getElementById('cpf');
   const dataEl = document.getElementById('slot_data');
@@ -9,12 +11,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   const params = new URLSearchParams(window.location.search);
   const forcedDate = params.get('data');
   const forcedLocal = params.get('local');
-  const forcedNome = params.get('nome');
   const forcedSlot = params.get('slot');
 
   const { LIST_PUBLIC, LOOKUP } = window.CronaConfig;
 
-  // 🔹 1. Carrega as datas disponíveis via função list_slots
   async function loadDatas(cpf) {
     dataEl.disabled = true;
     dataEl.innerHTML = '<option value="">Carregando datas...</option>';
@@ -29,35 +29,31 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
       }
 
-      // ✅ filtra apenas os agendamentos ativos com vagas
       const ativos = json.slots.filter(s => s.ativo && s.vagas_restantes > 0);
-
       if (ativos.length === 0) {
         dataEl.innerHTML =
           '<option value="">Nenhum agendamento disponível</option>';
         return;
       }
 
-      // ✅ monta o select
       dataEl.innerHTML =
         '<option value="">Selecione uma data...</option>' +
         ativos
           .map(
             s => `
-            <option value="${s.data}">
-              ${s.data} — ${s.local} (${s.vagas_restantes}/${s.vagas_totais})
-            </option>`,
+          <option value="${s.data}">
+            ${s.data} — ${s.local} (${s.vagas_restantes}/${s.vagas_totais})
+          </option>`,
           )
           .join('');
 
       dataEl.disabled = false;
     } catch (err) {
-      console.error('❌ Erro ao carregar datas', err);
+      error('❌ Erro ao carregar datas', err);
       dataEl.innerHTML = '<option value="">Erro ao carregar datas</option>';
     }
   }
 
-  // 🔹 2. Define comportamento conforme parâmetros na URL
   if (forcedSlot) {
     try {
       const res = await fetch(`${LIST_PUBLIC}?slot=${forcedSlot}`);
@@ -65,13 +61,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       if (json.ok && json.slots?.length > 0) {
         const s = json.slots[0];
-        dataEl.innerHTML = `
-    <option value="${s.data}" selected>
-      ${s.data} — ${s.local} (${s.vagas_restantes || s.vagas_totais})
-    </option>`;
+        dataEl.innerHTML = `<option value="${s.data}" selected>
+          ${s.data} — ${s.local} (${s.vagas_restantes || s.vagas_totais})
+        </option>`;
         dataEl.disabled = true;
 
-        // 🧠 Salva o local (e horários, se quiser) em sessionStorage para o termo
         sessionStorage.setItem(
           'slotInfo',
           JSON.stringify({
@@ -85,7 +79,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         await loadDatas();
       }
     } catch (err) {
-      console.error('Erro ao carregar slot forçado:', err);
+      error('Erro ao carregar slot forçado:', err);
       await loadDatas();
     }
   } else if (forcedDate) {
@@ -99,7 +93,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     await loadDatas();
   }
 
-  // 🔹 3. Clique do botão "Continuar"
   btn.addEventListener('click', async () => {
     const cpfDigits = cpfEl.value.replace(/\D/g, '');
     const slot_data = dataEl.value.trim();
@@ -128,7 +121,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       });
 
       const result = await resp.json();
-      console.log('[lookup_cpf]', result);
+      log('[lookup_cpf]', result);
 
       if (result.status === 'SIGNED_FOR_DATE') {
         window.location.href = 'ja-assinou.html';
@@ -136,43 +129,23 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
 
       const slotInfo = JSON.parse(sessionStorage.getItem('slotInfo') || '{}');
-
-      // ✅ Novo trecho — agora guarda tudo o que veio do Supabase
       let prefill = {
         cpf: cpfDigits,
         slot_data: slotInfo.data || slot_data,
-        slot_local: slotInfo.local || forcedLocal || '',
+        slot_local: slotInfo.local || slot_local,
         horario_inicio: slotInfo.horario_inicio || '',
         horario_fim: slotInfo.horario_fim || '',
         _ts: Date.now(),
       };
 
-      // Se o CPF já existir no sistema (SIGNED_PREVIOUSLY ou REGISTERED_NOT_SIGNED)
-      console.log('Result data:', result.data);
       if (result.data) {
-        prefill = {
-          ...prefill,
-          nome: result.data.nome || '',
-          rg: result.data.rg || '',
-          email: result.data.email || '',
-          telefone: result.data.telefone || '',
-          emergencia_nome: result.data.emergencia_nome || '',
-          emergencia_telefone: result.data.emergencia_telefone || '',
-          condicoes_saude: result.data.condicoes_saude || '',
-          medicamentos: result.data.medicamentos || '',
-          alergias: result.data.alergias || '',
-          data_nascimento: result.data.data_nascimento || '',
-        };
+        prefill = { ...prefill, ...result.data };
       }
-
-      // Salva tudo no sessionStorage para ser usado em termo.html
-      sessionStorage.setItem('prefill', JSON.stringify(prefill));
-      window.location.href = 'termo.html';
 
       sessionStorage.setItem('prefill', JSON.stringify(prefill));
       window.location.href = 'termo.html';
     } catch (e) {
-      console.error(e);
+      error(e);
       msgEl.textContent = 'Erro ao consultar. Tente novamente.';
       msgEl.className = 'mt-3 text-sm text-rose-700';
     }

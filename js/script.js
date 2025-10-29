@@ -1,8 +1,8 @@
-// ======================== TERMO.JS (versão depurável corrigida) ========================
-document.addEventListener('DOMContentLoaded', () => {
-  console.log('📄 Termo.js iniciado');
+import { log, warn, error } from './loggerHelper.js';
 
-  // status + ano
+document.addEventListener('DOMContentLoaded', () => {
+  log('📄 Termo.js iniciado');
+
   const statusEl = document.getElementById('status');
   const setStatus = (msg, ok = true) => {
     if (!statusEl) return;
@@ -10,12 +10,12 @@ document.addEventListener('DOMContentLoaded', () => {
     statusEl.className = ok
       ? 'text-sm text-emerald-700'
       : 'text-sm text-rose-700';
-    console.log('📢 STATUS:', msg);
+    log('📢 STATUS:', msg);
   };
+
   const yearEl = document.getElementById('year');
   if (yearEl) yearEl.textContent = new Date().getFullYear();
 
-  // máscaras
   const cpfInput = document.querySelector('input[name="cpf"]');
   const rgInput = document.querySelector('input[name="rg"]');
   const telInput = document.querySelector('input[name="telefone"]');
@@ -36,26 +36,23 @@ document.addEventListener('DOMContentLoaded', () => {
     ? IMask(eTelInput, { mask: '(00) 00000-0000' })
     : null;
 
-  console.log('🧩 Máscaras aplicadas:', { cpfMask, rgMask, telMask, eTelMask });
+  log('🧩 Máscaras aplicadas:', { cpfMask, rgMask, telMask, eTelMask });
 
-  // prefill (sessionStorage)
-  // ===== PREFILL COM DEBUG =====
   try {
     const pre = JSON.parse(sessionStorage.getItem('prefill') || 'null');
-    console.log('🧠 Prefill encontrado no sessionStorage:', pre);
+    log('🧠 Prefill encontrado:', pre);
 
     if (pre) {
       const setVal = (name, value) => {
         const el = document.querySelector(`[name="${name}"]`);
         if (el) {
           el.value = value ?? '';
-          console.log(`✅ Campo preenchido: ${name} =`, value);
+          log(`✅ Campo preenchido: ${name} =`, value);
         } else {
-          console.warn(`⚠️ Campo não encontrado no HTML: ${name}`);
+          warn(`⚠️ Campo não encontrado no HTML: ${name}`);
         }
       };
 
-      // Campos básicos
       setVal('nome', pre.nome);
       if (cpfMask) cpfMask.unmaskedValue = pre.cpf || '';
       setVal('rg', pre.rg);
@@ -69,7 +66,6 @@ document.addEventListener('DOMContentLoaded', () => {
       setVal('alergias', pre.alergias);
       setVal('slot_local', pre.slot_local);
 
-      // Data (campo visual e oculto)
       const dEl = document.getElementById('slot_data_display');
       const hiddenData = document.getElementById('slot_data');
       if (dEl && hiddenData) {
@@ -79,12 +75,12 @@ document.addEventListener('DOMContentLoaded', () => {
         dEl.classList.add('bg-gray-100', 'cursor-not-allowed');
       }
 
-      console.log('✅ Todos os campos tentados preencher.');
+      log('✅ Todos os campos tentados preencher.');
     } else {
-      console.log('❌ Nenhum prefill encontrado no sessionStorage');
+      log('❌ Nenhum prefill encontrado no sessionStorage');
     }
   } catch (err) {
-    console.error('💥 Erro ao carregar prefill:', err);
+    error('💥 Erro ao carregar prefill:', err);
   }
 
   // query params (data/local)
