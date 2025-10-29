@@ -148,6 +148,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       };
 
       // Se o CPF já existir no sistema (SIGNED_PREVIOUSLY ou REGISTERED_NOT_SIGNED)
+      console.log('Result data:', result.data);
       if (result.data) {
         prefill = {
           ...prefill,
@@ -160,6 +161,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           condicoes_saude: result.data.condicoes_saude || '',
           medicamentos: result.data.medicamentos || '',
           alergias: result.data.alergias || '',
+          data_nascimento: result.data.data_nascimento || '',
         };
       }
 

@@ -1,4 +1,7 @@
+// ======================== TERMO.JS (versão depurável corrigida) ========================
 document.addEventListener('DOMContentLoaded', () => {
+  console.log('📄 Termo.js iniciado');
+
   // status + ano
   const statusEl = document.getElementById('status');
   const setStatus = (msg, ok = true) => {
@@ -7,6 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
     statusEl.className = ok
       ? 'text-sm text-emerald-700'
       : 'text-sm text-rose-700';
+    console.log('📢 STATUS:', msg);
   };
   const yearEl = document.getElementById('year');
   if (yearEl) yearEl.textContent = new Date().getFullYear();
@@ -32,32 +36,58 @@ document.addEventListener('DOMContentLoaded', () => {
     ? IMask(eTelInput, { mask: '(00) 00000-0000' })
     : null;
 
-  // prefill
+  console.log('🧩 Máscaras aplicadas:', { cpfMask, rgMask, telMask, eTelMask });
+
+  // prefill (sessionStorage)
+  // ===== PREFILL COM DEBUG =====
   try {
     const pre = JSON.parse(sessionStorage.getItem('prefill') || 'null');
+    console.log('🧠 Prefill encontrado no sessionStorage:', pre);
+
     if (pre) {
       const setVal = (name, value) => {
         const el = document.querySelector(`[name="${name}"]`);
-        if (el && value) el.value = value;
+        if (el) {
+          el.value = value ?? '';
+          console.log(`✅ Campo preenchido: ${name} =`, value);
+        } else {
+          console.warn(`⚠️ Campo não encontrado no HTML: ${name}`);
+        }
       };
 
+      // Campos básicos
       setVal('nome', pre.nome);
       if (cpfMask) cpfMask.unmaskedValue = pre.cpf || '';
+      setVal('rg', pre.rg);
+      setVal('email', pre.email);
+      setVal('data_nascimento', pre.data_nascimento);
+      setVal('telefone', pre.telefone);
+      setVal('emergencia_nome', pre.emergencia_nome);
+      setVal('emergencia_telefone', pre.emergencia_telefone);
+      setVal('condicoes_saude', pre.condicoes_saude);
+      setVal('medicamentos', pre.medicamentos);
+      setVal('alergias', pre.alergias);
       setVal('slot_local', pre.slot_local);
-      setVal('slot_data', pre.slot_data);
 
+      // Data (campo visual e oculto)
       const dEl = document.getElementById('slot_data_display');
-      if (dEl) {
+      const hiddenData = document.getElementById('slot_data');
+      if (dEl && hiddenData) {
         dEl.value = pre.slot_data || '';
+        hiddenData.value = pre.slot_data || '';
         dEl.readOnly = true;
         dEl.classList.add('bg-gray-100', 'cursor-not-allowed');
       }
+
+      console.log('✅ Todos os campos tentados preencher.');
+    } else {
+      console.log('❌ Nenhum prefill encontrado no sessionStorage');
     }
   } catch (err) {
-    console.warn('Erro ao carregar prefill', err);
+    console.error('💥 Erro ao carregar prefill:', err);
   }
 
-  // Se vier via querystring (ex: ?data=2025-11-02&local=Sala%203)
+  // query params (data/local)
   const params = new URLSearchParams(window.location.search);
   if (params.has('data')) {
     const dataVal = params.get('data');
@@ -80,7 +110,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // assinatura
+  // assinatura canvas
   const form = document.getElementById('termoForm');
   const btn = document.getElementById('submitBtn');
   const canvas = document.getElementById('signature');
@@ -157,7 +187,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!name) return alert('Digite seu nome completo.');
     drawTyped(name);
   });
-
   typedName.addEventListener('input', () => {
     if (sigMode === 'type' && typedName.value.trim().length > 0) {
       drawTyped(typedName.value.trim());
@@ -171,6 +200,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!cpf || cpf.length !== 11 || !slotData) return;
 
     setStatus('Buscando dados do participante...');
+    console.log('🔎 Buscando CPF:', cpf, 'para data', slotData);
 
     try {
       const resp = await fetch(
@@ -183,56 +213,68 @@ document.addEventListener('DOMContentLoaded', () => {
       );
 
       const result = await resp.json();
-      console.log('🔍 lookup_cpf:', result);
+      console.log('🔍 lookup_cpf RESULTADO:', result);
 
       if (result.status === 'SIGNED_FOR_DATE') {
         setStatus('Este CPF já assinou o termo para esta data.', false);
         document.getElementById('submitBtn').disabled = true;
         return;
       }
+
       if (result.status === 'SIGNED_PREVIOUSLY' && result.data) {
         const p = result.data;
-        console.log('📋 Dados recebidos do Supabase:', p);
+        console.log('📄 Dados recebidos (SIGNED_PREVIOUSLY):', p);
 
-        const campos = [
-          'nome',
-          'rg',
-          'email',
-          'telefone',
-          'emergencia_nome',
-          'emergencia_telefone',
-          'condicoes_saude',
-          'medicamentos',
-          'alergias',
-          'observacoes',
-          'preferencias',
-          'outras_informacoes',
-        ];
+        setTimeout(() => {
+          const safeSet = (name, value) => {
+            const el = document.querySelector(`[name="${name}"]`);
+            if (el && value) el.value = value;
+          };
 
-        campos.forEach(campo => {
-          const el = document.querySelector(`[name="${campo}"]`);
-          if (el && p[campo] !== undefined && p[campo] !== null) {
-            el.value = p[campo];
+          safeSet('nome', p.nome);
+          safeSet('rg', p.rg);
+          safeSet('email', p.email);
+          safeSet('emergencia_nome', p.emergencia_nome);
+          safeSet('condicoes_saude', p.condicoes_saude);
+          safeSet('medicamentos', p.medicamentos);
+          safeSet('alergias', p.alergias);
+          safeSet('data_nascimento', p.data_nascimento);
+
+          // Campos com máscara
+          if (telMask && p.telefone) {
+            telMask.value = p.telefone;
+            console.log('📞 Telefone preenchido via máscara:', p.telefone);
           }
-        });
+          if (eTelMask && p.emergencia_telefone) {
+            eTelMask.value = p.emergencia_telefone;
+            console.log(
+              '🚑 Telefone emergência via máscara:',
+              p.emergencia_telefone,
+            );
+          }
+          if (cpfMask && p.cpf) {
+            cpfMask.value = p.cpf;
+            console.log('🪪 CPF confirmado:', p.cpf);
+          }
 
-        setStatus(
-          'Dados carregados automaticamente do último termo assinado.',
-          true,
-        );
+          setStatus(
+            'Dados carregados automaticamente do último termo assinado.',
+            true,
+          );
+        }, 200);
+
         return;
       }
 
       if (result.status === 'REGISTERED_NOT_SIGNED' && result.data) {
         const p = result.data;
+        console.log('🟢 Participante existente, sem termo:', p);
         document.querySelector('[name="nome"]').value = p.nome || '';
         document.querySelector('[name="rg"]').value = p.rg || '';
         document.querySelector('[name="email"]').value = p.email || '';
-        document.querySelector('[name="telefone"]').value = p.telefone || '';
-        document.querySelector('[name="emergencia_nome"]').value =
-          p.emergencia_nome || '';
-        document.querySelector('[name="emergencia_telefone"]').value =
-          p.emergencia_telefone || '';
+        if (telMask && p.telefone) telMask.value = p.telefone;
+        if (eTelMask && p.emergencia_telefone)
+          eTelMask.value = p.emergencia_telefone;
         document.querySelector('[name="condicoes_saude"]').value =
           p.condicoes_saude || '';
         document.querySelector('[name="medicamentos"]').value =
@@ -241,9 +283,10 @@ document.addEventListener('DOMContentLoaded', () => {
         setStatus('Dados carregados automaticamente.', true);
       } else {
         setStatus('CPF não encontrado. Preencha os dados normalmente.', false);
+        console.log('⚪ Novo participante, sem registros prévios.');
       }
     } catch (err) {
-      console.error('Erro lookup_cpf:', err);
+      console.error('❌ Erro lookup_cpf:', err);
       setStatus('Erro ao buscar CPF.', false);
     }
   });
@@ -273,6 +316,8 @@ document.addEventListener('DOMContentLoaded', () => {
       obj.assinatura = assinatura;
       obj.sigMode = sigMode;
 
+      console.log('📤 Enviando termo:', obj);
+
       const resp = await fetch(SUBMIT, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -281,14 +326,17 @@ document.addEventListener('DOMContentLoaded', () => {
           created_at: new Date().toISOString(),
         }),
       });
+
       const j = await resp.json();
+      console.log('✅ Resposta envio:', j);
+
       if (!resp.ok || !j.ok) throw new Error(j.error || 'Falha ao enviar');
 
       setStatus('Assinado e enviado com sucesso!');
       sessionStorage.removeItem('prefill');
       setTimeout(() => (window.location.href = 'sucesso.html'), 1000);
     } catch (err) {
-      console.error(err);
+      console.error('❌ Erro ao enviar termo:', err);
       setStatus('Erro ao enviar. Tente novamente.', false);
     } finally {
       btn.disabled = false;
