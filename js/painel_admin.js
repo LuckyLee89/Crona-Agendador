@@ -30,32 +30,48 @@ document.addEventListener('DOMContentLoaded', async () => {
   async function carregarSlots(filtros = {}) {
     msg.textContent = 'Carregando agendamentos...';
 
-    let query = supabase
-      .from('slots')
-      .select('*')
-      .order('data', { ascending: true });
-
-    if (filtros.data) query = query.eq('data', filtros.data);
-    if (filtros.local) query = query.ilike('local', `%${filtros.local}%`);
-    if (filtros.email)
-      query = query.ilike('email_criador', `%${filtros.email}%`);
-
-    const { data, error } = await query;
-
-    if (error) {
-      console.error(error);
-      msg.textContent = 'Erro ao carregar agendamentos.';
+    // pegue o token como no painel comum, se ainda não tiver
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    const token = session?.access_token;
+    if (!token) {
+      msg.textContent = 'Sessão expirada — faça login novamente.';
       return;
     }
 
-    if (!data || data.length === 0) {
-      painel.innerHTML =
-        '<p class="text-center text-gray-500">Nenhum agendamento encontrado.</p>';
-      msg.textContent = '';
-      return;
-    }
+    try {
+      const resp = await fetch(window.CronaConfig.LIST, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      const payload = await resp.json();
+      if (!payload.ok) throw new Error('Falha ao listar agendamentos');
 
-    painel.innerHTML = `
+      // aplica filtros do admin
+      let rows = payload.slots || [];
+      if (filtros.data) rows = rows.filter(s => s.data === filtros.data);
+      if (filtros.local)
+        rows = rows.filter(s =>
+          s.local.toLowerCase().includes(filtros.local.toLowerCase()),
+        );
+      if (filtros.email)
+        rows = rows.filter(s =>
+          (s.email_criador || '')
+            .toLowerCase()
+            .includes(filtros.email.toLowerCase()),
+        );
+
+      if (!rows.length) {
+        painel.innerHTML =
+          '<p class="text-center text-gray-500">Nenhum agendamento encontrado.</p>';
+        msg.textContent = '';
+        return;
+      }
+
+      painel.innerHTML = `
       <table class="w-full border border-gray-200 rounded-xl text-sm">
         <thead class="bg-gray-100">
           <tr>
@@ -68,100 +84,82 @@ document.addEventListener('DOMContentLoaded', async () => {
           </tr>
         </thead>
         <tbody>
-          ${data
+          ${rows
             .map(
-              slot => `
+              s => `
             <tr class="border-t">
-              <td class="px-3 py-2">${slot.data}</td>
-              <td class="px-3 py-2">${slot.local}</td>
-              <td class="px-3 py-2">${slot.horario_inicio} — ${
-                slot.horario_fim
-              }</td>
-              <td class="px-3 py-2">${slot.vagas_restantes}/${
-                slot.vagas_totais
-              }</td>
+              <td class="px-3 py-2">${s.data}</td>
+              <td class="px-3 py-2">${s.local}</td>
+              <td class="px-3 py-2">${s.horario_inicio} — ${s.horario_fim}</td>
+              <td class="px-3 py-2">${s.vagas_restantes}/${s.vagas_totais}</td>
               <td class="px-3 py-2 text-center">
                 <span class="px-2 py-1 rounded-lg text-xs ${
-                  slot.ativo
+                  s.ativo
                     ? 'bg-emerald-100 text-emerald-800'
                     : 'bg-rose-100 text-rose-800'
                 }">
-                  ${slot.ativo ? 'Ativo' : 'Inativo'}
+                  ${s.ativo ? 'Ativo' : 'Inativo'}
                 </span>
               </td>
               <td class="px-3 py-2 text-center flex justify-center gap-2 flex-wrap">
                 ${
-                  slot.link
+                  s.link
                     ? `
-                      <a href="${slot.link}" target="_blank"
-                        class="text-blue-600 underline text-sm">Abrir</a>
-                      <button class="text-sm text-gray-600 hover:text-black copyLink"
-                        data-link="${slot.link}">Copiar</button>
-                    `
+                  <a href="${s.link}" target="_blank" class="text-blue-600 underline text-sm">Abrir</a>
+                  <button class="text-sm text-gray-600 hover:text-black copyLink" data-link="${s.link}">Copiar</button>
+                `
                     : '<span class="text-gray-400 italic text-sm">Sem link</span>'
                 }
-                <button
-                  data-id="${slot.id}"
-                  class="toggleAtivo text-sm text-blue-600 hover:underline"
-                >
-                  ${slot.ativo ? 'Desativar' : 'Ativar'}
+                <button data-id="${s.id}" data-active="${
+                s.ativo
+              }" class="toggleAtivo text-sm text-blue-600 hover:underline">
+                  ${s.ativo ? 'Desativar' : 'Ativar'}
                 </button>
               </td>
-            </tr>`,
+            </tr>
+          `,
             )
             .join('')}
         </tbody>
       </table>
     `;
-    msg.textContent = '';
+      msg.textContent = '';
 
-    document.querySelectorAll('.toggleAtivo').forEach(btn =>
-      btn.addEventListener('click', async e => {
-        const id = e.target.dataset.id;
-        const slot = data.find(s => String(s.id) === String(id));
-        if (!slot) {
-          alert('Erro: agendamento não encontrado.');
-          return;
-        }
-        const novoStatus = !slot.ativo;
-        try {
-          const resp = await fetch(
-            'https://qrtjuypghjbyrbepwvbb.functions.supabase.co/functions/v1/toggle_slot',
-            {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ id: slot.id, ativo: novoStatus }),
-            },
-          );
-          const result = await resp.json();
-          if (!result.ok) {
-            console.error(result.error);
-            alert('Erro ao atualizar status.');
-          } else {
-            alert(
-              `Agendamento ${
-                novoStatus ? 'ativado' : 'desativado'
-              } com sucesso!`,
-            );
-            carregarSlots();
-          }
-        } catch (err) {
-          console.error('Erro ao chamar função toggle_slot:', err);
-          alert('Erro de conexão com o servidor.');
-        }
-      }),
-    );
-
-    // Copiar link
-    document.querySelectorAll('.copyLink').forEach(btn => {
-      btn.addEventListener('click', () => {
-        navigator.clipboard.writeText(btn.dataset.link);
-        btn.textContent = 'Copiado!';
-        setTimeout(() => (btn.textContent = 'Copiar'), 2000);
+      // ações
+      painel.querySelectorAll('.copyLink').forEach(btn => {
+        btn.addEventListener('click', () => {
+          navigator.clipboard.writeText(btn.dataset.link);
+          btn.textContent = 'Copiado!';
+          setTimeout(() => (btn.textContent = 'Copiar'), 2000);
+        });
       });
-    });
+      painel.querySelectorAll('.toggleAtivo').forEach(btn => {
+        btn.addEventListener('click', async e => {
+          const id = e.currentTarget.dataset.id;
+          const ativo = e.currentTarget.dataset.active === 'true';
+          try {
+            const r = await fetch(window.CronaConfig.TOGGLE_SLOT, {
+              method: 'POST',
+              headers: {
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ id, ativo: !ativo }),
+            });
+            const j = await r.json();
+            if (!j.ok) throw new Error(j.error || 'Falha ao atualizar');
+            carregarSlots(filtros);
+          } catch (err) {
+            console.error(err);
+            alert('Erro ao atualizar status.');
+          }
+        });
+      });
+    } catch (err) {
+      console.error(err);
+      msg.textContent = 'Erro ao carregar agendamentos.';
+    }
   }
-
   btnFiltrar.addEventListener('click', () => {
     const filtros = {
       data: document.getElementById('filtroData').value || null,
