@@ -2,7 +2,6 @@
 # 🧱 Node / Tailwind / Build
 # =======================================
 node_modules/
-dist/
 .cache/
 .tmp/
 .vscode/
