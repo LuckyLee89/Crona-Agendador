@@ -1,0 +1,17 @@
+# =======================================
+# 🧱 Node / Tailwind / Build
+# =======================================
+node_modules/
+dist/
+.cache/
+.tmp/
+.vscode/
+.DS_Store
+*.log
+npm-debug.log*
+
+# =======================================
+# ⚙️ Tailwind output
+# =======================================
+tailwind.css.map
+*.css.map
